@@ -6,7 +6,7 @@ import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import {
   Lightbulb, Layers, Receipt, Coins, AreaChart, ShieldCheck,
   LayoutGrid, CircleDollarSign, PiggyBank, ReceiptText, ScanLine, Heart,
-  Landmark, Wallet, Sparkles
+  Landmark, Wallet, Sparkles, ShoppingCart, Plane
 } from "lucide-react";
 
 /* ─── tiny scroll-reveal hook ─── */
@@ -657,9 +657,9 @@ function HowItWorksVisual() {
 
         {/* mini stat cards */}
         {[
-          { label: "Total Budget", val: "$5,200", color: "#1c6cff", icon: "🏦" },
-          { label: "Total Spent",  val: "$3,140", color: "#ff4433", icon: "💳" },
-          { label: "Remaining",    val: "$2,060", color: "#00cc4b", icon: "💰" },
+          { label: "Total Budget", val: "$5,200", color: "#1c6cff", icon: Landmark },
+          { label: "Total Spent",  val: "$3,140", color: "#ff4433", icon: Wallet },
+          { label: "Remaining",    val: "$2,060", color: "#00cc4b", icon: Coins },
         ].map((s) => (
           <div
             key={s.label}
@@ -675,7 +675,7 @@ function HowItWorksVisual() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 18 }}>{s.icon}</span>
+              <s.icon style={{ width: 18, height: 18, color: s.color }} />
               <span style={{ color: "#ccced0", fontSize: 13, fontWeight: 300 }}>{s.label}</span>
             </div>
             <span style={{ fontFamily: '"Space Grotesk",sans-serif', fontWeight: 700, fontSize: 16, color: s.color }}>
@@ -686,15 +686,19 @@ function HowItWorksVisual() {
 
         {/* mini progress bars */}
         <div style={{ marginTop: 20 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", mb: 8 }}>
-            <span style={{ color: "#999ca1", fontSize: 12, fontWeight: 300 }}>🛒 Groceries</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 8 }}>
+            <span style={{ color: "#ccced0", fontSize: 12, fontWeight: 300, display: "flex", alignItems: "center", gap: 6 }}>
+              <ShoppingCart className="w-3.5 h-3.5 text-[#ff4433]" /> Groceries
+            </span>
             <span style={{ color: "#ff4433", fontSize: 12, fontWeight: 600 }}>85%</span>
           </div>
           <div style={{ background: "rgba(255,255,255,0.06)", height: 6, borderRadius: 999, marginBottom: 16, marginTop: 4 }}>
             <div style={{ width: "85%", height: 6, borderRadius: 999, background: "#ff4433", transition: "width 1.5s ease" }} />
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", mb: 8 }}>
-            <span style={{ color: "#999ca1", fontSize: 12, fontWeight: 300 }}>✈️ Travel</span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 8 }}>
+            <span style={{ color: "#ccced0", fontSize: 12, fontWeight: 300, display: "flex", alignItems: "center", gap: 6 }}>
+              <Plane className="w-3.5 h-3.5 text-[#00acfe]" /> Travel
+            </span>
             <span style={{ color: "#00acfe", fontSize: 12, fontWeight: 600 }}>42%</span>
           </div>
           <div style={{ background: "rgba(255,255,255,0.06)", height: 6, borderRadius: 999, marginTop: 4 }}>
@@ -715,7 +719,7 @@ function HowItWorksVisual() {
             alignItems: "flex-start",
           }}
         >
-          <span style={{ fontSize: 18 }}>✨</span>
+          <Sparkles style={{ width: 16, height: 16, color: "#1c6cff", flexShrink: 0, marginTop: 2 }} />
           <span style={{ color: "#ccced0", fontSize: 12, fontWeight: 300, lineHeight: 1.6 }}>
             <strong style={{ color: "#1c6cff", fontWeight: 600 }}>AI Tip:</strong> Your grocery spend is at 85%. Consider meal prepping this week to stay under budget.
           </span>
