@@ -40,6 +40,10 @@ export const api = {
 
   getAdvice: (body) => request("/advice", { method: "POST", body: JSON.stringify(body) }),
 
+  getBudgetAlerts: () => request("/budget-alerts"),
+
+  sendChatMessage: (body) => request("/chat", { method: "POST", body: JSON.stringify(body) }),
+
   getWellnessProfile: () => request("/wellness"),
   updateWellnessProfile: (body) => request("/wellness", { method: "PUT", body: JSON.stringify(body) }),
   analyzeBurnout: () => request("/wellness/analyze"),

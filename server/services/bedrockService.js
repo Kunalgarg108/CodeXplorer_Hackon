@@ -51,12 +51,35 @@ const parseJsonResponse = (text) => {
   } catch {
     const fencedMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
     if (fencedMatch) {
-      return JSON.parse(fencedMatch[1].trim());
+      try {
+        return JSON.parse(fencedMatch[1].trim());
+      } catch { /* fall through */ }
     }
 
     const objectMatch = trimmed.match(/\{[\s\S]*\}/);
     if (objectMatch) {
-      return JSON.parse(objectMatch[0]);
+      try {
+        return JSON.parse(objectMatch[0]);
+      } catch {
+        // JSON is truncated - try to fix by closing the array and object
+        let partial = objectMatch[0];
+        // Remove trailing incomplete object (after last complete },)
+        const lastCompleteItem = partial.lastIndexOf("},");
+        if (lastCompleteItem > 0) {
+          partial = partial.substring(0, lastCompleteItem + 1) + "]}";
+          try {
+            return JSON.parse(partial);
+          } catch { /* fall through */ }
+        }
+        // Try closing with just ]}
+        const lastBrace = partial.lastIndexOf("}");
+        if (lastBrace > 0) {
+          partial = partial.substring(0, lastBrace + 1) + "]}";
+          try {
+            return JSON.parse(partial);
+          } catch { /* fall through */ }
+        }
+      }
     }
 
     throw new Error("Unable to parse menu extraction response");
@@ -225,7 +248,7 @@ export const extractMenuItemsFromImage = async (imagePath) => {
           ],
         },
       ],
-      max_tokens: 1000,
+      max_tokens: 8000,
     });
 
     const text = response.choices[0].message.content;

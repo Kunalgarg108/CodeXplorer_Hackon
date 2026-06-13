@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { menuApi } from "@/lib/menuApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SmartBudgetAlerts from "@/components/dashboard/SmartBudgetAlerts";
+import AiFinancialChat from "@/components/dashboard/AiFinancialChat";
 
 const POLL_INTERVAL_MS = 3000;
 const TERMINAL_STATUSES = ["completed", "failed"];
@@ -154,6 +156,16 @@ export default function MenuScanner() {
 
   return (
     <div className="p-6 md:p-10 max-w-4xl">
+      {/* Smart Budget Alerts */}
+      <div className="mb-8">
+        <SmartBudgetAlerts />
+      </div>
+
+      {/* AI Financial Assistant Chat */}
+      <div className="mb-8">
+        <AiFinancialChat />
+      </div>
+
       <p className="eyebrow text-xs mb-2">Menu Scanner</p>
       <h2 className="display-section mb-2">Scan Restaurant Menu</h2>
       <p className="text-fog font-thin mb-8 max-w-2xl">
@@ -272,40 +284,42 @@ export default function MenuScanner() {
       {jobStatus === "Completed" && (
         <div className="mt-6 neo-card">
           <p className="eyebrow text-xs mb-2">Extracted Menu Items</p>
-          <div className="hidden md:grid md:grid-cols-[1fr_120px_140px] gap-4 px-4 py-3 bg-indigo/40 rounded-btn mb-2 text-xs font-medium text-mist uppercase tracking-wide">
-            <span>Item Name</span>
-            <span>Price</span>
-            <span>Category</span>
-          </div>
+          <div className="max-h-[600px] overflow-y-auto">
+            <div className="hidden md:grid md:grid-cols-[1fr_120px_140px] gap-4 px-4 py-3 bg-indigo/40 rounded-btn mb-2 text-xs font-medium text-mist uppercase tracking-wide sticky top-0 z-10">
+              <span>Item Name</span>
+              <span>Price</span>
+              <span>Category</span>
+            </div>
 
-          <div className="space-y-2 md:space-y-0">
-            {menuItems.length > 0 ? (
-              menuItems.map((item, index) => (
-                <div
-                  key={`${item.name}-${index}`}
-                  className="md:grid md:grid-cols-[1fr_120px_140px] md:gap-4 md:items-center rounded-btn border border-steel/20 bg-deep/60 p-4 md:px-4 md:py-3 md:border-0 md:border-b md:border-steel/20 md:rounded-none md:bg-transparent last:md:border-b-0"
-                >
-                  <div className="md:contents">
-                    <div className="flex justify-between md:block gap-4 mb-2 md:mb-0">
-                      <span className="text-mist text-xs uppercase md:hidden">Item Name</span>
-                      <span className="text-paper font-thin text-sm">{item.name || item.itemName || "—"}</span>
-                    </div>
-                    <div className="flex justify-between md:block gap-4 mb-2 md:mb-0">
-                      <span className="text-mist text-xs uppercase md:hidden">Price</span>
-                      <span className="text-signal font-thin text-sm">
-                        {item.price != null ? (String(item.price).startsWith("$") ? item.price : `$${item.price}`) : "—"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between md:block gap-4">
-                      <span className="text-mist text-xs uppercase md:hidden">Category</span>
-                      <span className="text-fog font-thin text-sm">{item.category || "—"}</span>
+            <div className="space-y-2 md:space-y-0">
+              {menuItems.length > 0 ? (
+                menuItems.map((item, index) => (
+                  <div
+                    key={`${item.name}-${index}`}
+                    className="md:grid md:grid-cols-[1fr_120px_140px] md:gap-4 md:items-center rounded-btn border border-steel/20 bg-deep/60 p-4 md:px-4 md:py-3 md:border-0 md:border-b md:border-steel/20 md:rounded-none md:bg-transparent last:md:border-b-0"
+                  >
+                    <div className="md:contents">
+                      <div className="flex justify-between md:block gap-4 mb-2 md:mb-0">
+                        <span className="text-mist text-xs uppercase md:hidden">Item Name</span>
+                        <span className="text-paper font-thin text-sm">{item.name || item.itemName || "—"}</span>
+                      </div>
+                      <div className="flex justify-between md:block gap-4 mb-2 md:mb-0">
+                        <span className="text-mist text-xs uppercase md:hidden">Price</span>
+                        <span className="text-signal font-thin text-sm">
+                          {item.price != null ? (String(item.price).startsWith("$") ? item.price : `$${item.price}`) : "—"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between md:block gap-4">
+                        <span className="text-mist text-xs uppercase md:hidden">Category</span>
+                        <span className="text-fog font-thin text-sm">{item.category || "—"}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-mist text-sm font-thin p-4 text-center">No menu items found.</p>
-            )}
+                ))
+              ) : (
+                <p className="text-mist text-sm font-thin p-4 text-center">No menu items found.</p>
+              )}
+            </div>
           </div>
         </div>
       )}
