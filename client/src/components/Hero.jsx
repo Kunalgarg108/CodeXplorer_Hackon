@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import FloatingTags from "@/components/FloatingTags";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import {
+  Lightbulb, Layers, Receipt, Coins, AreaChart, ShieldCheck,
+  LayoutGrid, CircleDollarSign, PiggyBank, ReceiptText, ScanLine, Heart,
+  Landmark, Wallet, Sparkles
+} from "lucide-react";
 
 /* ─── tiny scroll-reveal hook ─── */
 function useReveal() {
@@ -51,21 +56,27 @@ function MockDashboard() {
           </div>
           <span className="font-display font-semibold text-sm">FinanSmart</span>
         </div>
-        <div className="space-y-1 flex-1">
+        <div className="space-y-1.5 flex-1">
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#1c6cff]/10 text-[#1c6cff] font-medium">
-            <span>📊</span> Overview
+            <LayoutGrid className="w-3.5 h-3.5" /> Dashboard
           </div>
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
-            <span>🛡️</span> Budgets
+            <CircleDollarSign className="w-3.5 h-3.5 text-[#00acfe]" /> Incomes
           </div>
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
-            <span>💰</span> Incomes
+            <PiggyBank className="w-3.5 h-3.5 text-[#00cc4b]" /> Budgets
           </div>
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
-            <span>💳</span> Expenses
+            <ReceiptText className="w-3.5 h-3.5 text-[#ff8833]" /> Expenses
           </div>
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
-            <span>✨</span> Upgrade
+            <ScanLine className="w-3.5 h-3.5 text-cyan-400" /> Menu Scanner
+          </div>
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+            <Heart className="w-3.5 h-3.5 text-tag-coral" /> Wellness Profile
+          </div>
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#9019e6]" /> Upgrade
           </div>
         </div>
         <div className="pt-4 border-t border-[#11263b]/40 flex items-center gap-2">
@@ -94,7 +105,7 @@ function MockDashboard() {
         <div className="flex-1 p-5 overflow-y-auto space-y-4">
           {/* AI Banner */}
           <div className="neo-card-glow p-3.5 flex items-start gap-2.5 text-left">
-            <span className="text-sm">✨</span>
+            <Sparkles className="w-3.5 h-3.5 text-[#1c6cff] shrink-0 mt-0.5 animate-pulse" />
             <div>
               <p className="eyebrow text-[9px] mb-0.5">FinanSmart AI Advisor</p>
               <p className="body-thin text-fog text-[10px] leading-relaxed">
@@ -106,16 +117,16 @@ function MockDashboard() {
           {/* Stat Cards */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: "Total Budget", val: "$5,200", icon: "🏦" },
-              { label: "Total Spent", val: "$3,140", icon: "💳", color: "text-tag-coral" },
-              { label: "Remaining", val: "$2,060", icon: "💰", color: "text-tag-lime" },
+              { label: "Total Budget", val: "$5,200", icon: Landmark, iconColor: "text-[#1c6cff]" },
+              { label: "Total Spent", val: "$3,140", icon: Wallet, iconColor: "text-tag-coral", color: "text-tag-coral" },
+              { label: "Remaining", val: "$2,060", icon: Coins, iconColor: "text-tag-lime", color: "text-tag-lime" },
             ].map((s) => (
               <div key={s.label} className="p-3 bg-[#010d1e] border border-[#11263b]/50 rounded-xl flex items-center justify-between text-left">
                 <div>
                   <p className="text-[9px] text-mist uppercase tracking-wider">{s.label}</p>
                   <p className={`text-xs md:text-sm font-display font-bold mt-0.5 ${s.color || "text-white"}`}>{s.val}</p>
                 </div>
-                <span className="text-base">{s.icon}</span>
+                <s.icon className={`w-3.5 h-3.5 ${s.iconColor}`} />
               </div>
             ))}
           </div>
@@ -186,37 +197,37 @@ function MockDashboard() {
 /* ─── feature cards data ─── */
 const FEATURES = [
   {
-    icon: "💡",
+    icon: Lightbulb,
     title: "AI Financial Advice",
     desc: "Get real-time, personalized guidance powered by AI — tailored to your actual spending and income data.",
     accent: "#1c6cff",
   },
   {
-    icon: "📊",
+    icon: Layers,
     title: "Budget Tracking",
     desc: "Create budgets, assign them emoji categories, and watch a live progress bar fill as you spend.",
     accent: "#00cc4b",
   },
   {
-    icon: "💸",
+    icon: Receipt,
     title: "Expense Management",
     desc: "Log every expense in seconds. Delete, review and analyze what's draining your wallet the most.",
     accent: "#ff8833",
   },
   {
-    icon: "💰",
+    icon: Coins,
     title: "Income Streams",
     desc: "Track multiple income sources side by side. Know exactly what's coming in every month.",
     accent: "#00acfe",
   },
   {
-    icon: "📈",
+    icon: AreaChart,
     title: "Visual Analytics",
     desc: "Bar charts and progress meters turn raw numbers into instant visual insight at a glance.",
     accent: "#ff33aa",
   },
   {
-    icon: "🔒",
+    icon: ShieldCheck,
     title: "Secure & Private",
     desc: "Your financial data stays yours. Authentication-protected routes and encrypted storage.",
     accent: "#9019e6",
@@ -224,7 +235,7 @@ const FEATURES = [
 ];
 
 /* ─── FeatureCard ─── */
-function FeatureCard({ icon, title, desc, accent, index }) {
+function FeatureCard({ icon: Icon, title, desc, accent, index }) {
   const [ref, visible] = useReveal();
   return (
     <div
@@ -251,12 +262,11 @@ function FeatureCard({ icon, title, desc, accent, index }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 22,
           marginBottom: 16,
           border: `1px solid ${accent}44`,
         }}
       >
-        {icon}
+        <Icon style={{ width: 22, height: 22, color: accent }} />
       </div>
       <h3
         style={{
