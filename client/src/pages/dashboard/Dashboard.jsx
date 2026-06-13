@@ -28,21 +28,22 @@ export default function Dashboard() {
   }, [user]);
 
   return (
-    <div className="p-8">
-      <h2 className="font-bold text-4xl">Hi, {user?.name} 👋</h2>
-      <p className="text-gray-500">Here's what happenning with your money, Lets Manage your expense</p>
+    <div className="p-6 md:p-10">
+      <p className="eyebrow text-xs mb-2">Overview</p>
+      <h2 className="display-section mb-2">Hi, {user?.name} 👋</h2>
+      <p className="text-muted-copilot text-sm mb-6">Here's what's happening with your money — let's manage your expenses.</p>
       <CardInfo budgetList={budgetList} incomeList={incomeList} />
-      <div className="grid grid-cols-1 lg:grid-cols-3 mt-6 gap-5">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 mt-8 gap-6">
+        <div className="lg:col-span-2 space-y-6">
           <BarChartDashboard budgetList={budgetList} />
           <ExpenseListTable expensesList={expensesList} refreshData={loadData} />
         </div>
         <div className="grid gap-5">
-          <h2 className="font-bold text-lg">Latest Budgets</h2>
+          <p className="eyebrow text-xs">Latest Budgets</p>
           {budgetList?.length > 0
             ? budgetList.map((budget) => <BudgetItem budget={budget} key={budget.id} />)
             : [1, 2, 3, 4].map((item) => (
-                <div key={item} className="h-[180px] w-full bg-slate-200 rounded-lg animate-pulse" />
+                <div key={item} className="h-[180px] w-full skeleton-pulse" />
               ))}
         </div>
       </div>

@@ -29,37 +29,40 @@ export default function DashboardLayout() {
   }, [user, path, navigate]);
 
   return (
-    <div>
-      <div className="fixed md:w-64 hidden md:block">
-        <div className="h-screen p-5 border shadow-sm">
-          <div className="flex flex-row items-center">
-            <img src="/chart-donut.svg" alt="logo" width={40} height={25} />
-            <span className="text-blue-800 font-bold text-xl">FinanSmart</span>
+    <div className="min-h-screen bg-midnight">
+      <div className="fixed md:w-64 hidden md:block z-40">
+        <div className="h-screen p-6 bg-deep border-r border-steel/30 shadow-neo">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
+              <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
+            </div>
+            <span className="font-display font-medium text-paper">FinanSmart</span>
           </div>
-          <div className="mt-5">
+          <nav className="mt-2">
             {menuList.map((menu, index) => (
               <Link to={menu.path} key={index}>
-                <h2 className={`flex gap-2 items-center text-gray-500 font-medium mb-2 p-4 cursor-pointer rounded-full hover:text-primary hover:bg-blue-100 ${path === menu.path && "text-primary bg-blue-100"}`}>
-                  <menu.icon />
+                <div className={`nav-link ${path === menu.path ? "nav-link-active" : ""}`}>
+                  <menu.icon size={18} />
                   {menu.name}
-                </h2>
+                </div>
               </Link>
             ))}
-          </div>
-          <div className="fixed bottom-10 p-5 flex gap-2 items-center">
-            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+          </nav>
+          <div className="fixed bottom-8 left-6 right-6 md:right-auto md:w-52 flex gap-3 items-center p-4 neo-card">
+            <div className="w-9 h-9 rounded-btn bg-signal text-paper flex items-center justify-center text-sm font-display font-semibold">
               {user?.name?.[0]?.toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-medium">{user?.name}</p>
-              <Button variant="link" className="p-0 h-auto text-xs" onClick={logout}>Logout</Button>
+              <p className="text-sm text-paper font-thin">{user?.name}</p>
+              <Button variant="link" className="p-0 h-auto text-xs text-fog" onClick={logout}>Logout</Button>
             </div>
           </div>
         </div>
       </div>
-      <div className="md:ml-64">
-        <div className="p-5 shadow-sm border-b flex justify-end md:hidden">
-          <Button variant="outline" className="rounded-full" onClick={logout}>Logout</Button>
+      <div className="md:ml-64 min-h-screen">
+        <div className="p-4 border-b border-steel/30 flex justify-between items-center md:hidden bg-deep">
+          <span className="font-display text-paper text-sm">FinanSmart</span>
+          <Button variant="outline" size="sm" onClick={logout}>Logout</Button>
         </div>
         <Outlet />
       </div>

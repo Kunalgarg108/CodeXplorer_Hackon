@@ -18,14 +18,15 @@ export default function Budgets() {
   }, [user]);
 
   return (
-    <div className="p-10">
-      <h2 className="font-bold text-3xl">My Budgets</h2>
-      <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="p-6 md:p-10">
+      <p className="eyebrow text-xs mb-2">Budgets</p>
+      <h2 className="display-section mb-8">My Budgets</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <CreateBudget refreshData={getBudgetList} />
         {budgetList?.length > 0
           ? budgetList.map((budget) => <BudgetItem budget={budget} key={budget.id} />)
           : [1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="w-full bg-slate-200 rounded-lg h-[150px] animate-pulse" />
+              <div key={item} className="w-full skeleton-pulse h-[150px]" />
             ))}
       </div>
     </div>
