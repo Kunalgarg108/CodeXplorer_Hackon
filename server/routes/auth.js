@@ -68,9 +68,60 @@ router.get("/me", async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev-secret");
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({ user: { id: user._id, name: user.name, email: user.email, wellnessProfile: user.wellnessProfile } });
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        dateOfBirth: user.dateOfBirth,
+        college: user.college,
+        course: user.course,
+        semester: user.semester,
+        wellnessProfile: user.wellnessProfile,
+      },
+    });
   } catch {
     res.status(401).json({ message: "Invalid token" });
+  }
+});
+
+router.put("/profile", async (req, res) => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev-secret");
+
+    const { name, dateOfBirth, college, course, semester } = req.body;
+    const updateFields = {};
+    if (name !== undefined) updateFields.name = name;
+    if (dateOfBirth !== undefined) updateFields.dateOfBirth = dateOfBirth || null;
+    if (college !== undefined) updateFields.college = college;
+    if (course !== undefined) updateFields.course = course;
+    if (semester !== undefined) updateFields.semester = semester;
+
+    const user = await User.findByIdAndUpdate(decoded.id, updateFields, { new: true }).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        dateOfBirth: user.dateOfBirth,
+        college: user.college,
+        course: user.course,
+        semester: user.semester,
+        wellnessProfile: user.wellnessProfile,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
