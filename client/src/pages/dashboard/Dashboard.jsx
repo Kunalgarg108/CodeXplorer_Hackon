@@ -9,6 +9,8 @@ import ExpenseListTable from "@/components/dashboard/ExpenseListTable";
 import DailyCheckinCard from "@/components/dashboard/DailyCheckinCard";
 import { Button } from "@/components/ui/button";
 import { Sparkles, HeartPulse, RefreshCw } from "lucide-react";
+import { motion } from "framer-motion";
+import BreathingSpacer from "@/components/dashboard/BreathingSpacer";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -19,6 +21,7 @@ export default function Dashboard() {
   const [burnoutAnalysis, setBurnoutAnalysis] = useState(null);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(true);
   const [analyzing, setAnalyzing] = useState(true);
+  const [isBreathingOpen, setIsBreathingOpen] = useState(false);
 
   const loadData = async () => {
     const [budgets, incomes, expenses] = await Promise.all([
@@ -75,6 +78,37 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 md:p-10 text-left">
+      {/* Burnout Alert Banner */}
+      {burnoutAnalysis?.burnoutPhase && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.01 }}
+          onClick={() => setIsBreathingOpen(true)}
+          className="mb-6 bg-gradient-to-r from-[#ff4433]/20 via-[#ff4433]/15 to-[#ff4433]/5 border border-[#ff4433]/60 hover:border-[#ff4433] p-4 rounded-xl flex items-center justify-between gap-4 cursor-pointer transition-all shadow-[0_0_20px_rgba(255,68,51,0.15)] relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-[#ff4433]/5 animate-pulse pointer-events-none" />
+          
+          <div className="flex items-center gap-3.5 relative z-10">
+            <span className="flex h-3.5 w-3.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4433] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#ff4433]"></span>
+            </span>
+            <div>
+              <h4 className="text-sm font-bold text-[#ff4433] font-display flex items-center gap-1.5">
+                🚨 Chronic Burnout Warning Active
+              </h4>
+              <p className="text-xs text-fog font-thin mt-1">
+                You've recorded high stress (&ge; 4/5) for {burnoutAnalysis?.consecutiveStressDays || 3} consecutive check-ins. Let's reset.
+              </p>
+            </div>
+          </div>
+          
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#ff4433] text-white hover:bg-[#ff4433]/90 transition-colors shrink-0 relative z-10 shadow-md">
+            Relax Now
+          </button>
+        </motion.div>
+      )}
       <p className="eyebrow text-xs mb-2">Overview</p>
       <h2 className="display-section mb-2">Hi, {user?.name} 👋</h2>
       <p className="text-muted-copilot text-sm mb-6">Here's what's happening with your money — let's manage your expenses.</p>
@@ -157,6 +191,9 @@ export default function Dashboard() {
               ))}
         </div>
       </div>
+
+      {/* Breathing Spacer Modal */}
+      <BreathingSpacer isOpen={isBreathingOpen} onClose={() => setIsBreathingOpen(false)} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-const fallbackBurnoutAnalysis = (profile, financeData) => {
+const fallbackBurnoutAnalysis = (profile, financeData, burnoutInfo) => {
   let riskLevel = "Low";
   let reason = "Your lifestyle and spending metrics look stable and balanced.";
   let tip = "Keep up the good habits! Try to maintain a regular sleep schedule.";
@@ -24,6 +24,11 @@ const fallbackBurnoutAnalysis = (profile, financeData) => {
     examWindowSpend = 0,
     totalSpend = 0
   } = financeData || {};
+
+  const {
+    burnoutPhase = false,
+    maxConsecutiveStressDays = 0
+  } = burnoutInfo || {};
 
   // Calculate days until exam
   let daysUntilExam = null;
@@ -93,10 +98,18 @@ const fallbackBurnoutAnalysis = (profile, financeData) => {
     score += 1;
   }
 
+  // Burnout phase factor (chronic high stress)
+  if (burnoutPhase) {
+    score += 6; // Enforce high risk category
+  }
+
   // Classify risk
-  if (score >= 8) {
+  if (score >= 8 || burnoutPhase) {
     riskLevel = "High";
-    if (rollingSleepAvg < 5.5) {
+    if (burnoutPhase) {
+      reason = `Chronic burnout phase active: High stress levels (>= 4/5) sustained for ${maxConsecutiveStressDays} consecutive check-ins.`;
+      tip = "Take a step back and practice the 4-7-8 guided breathing exercise using the pulsing red alert banner on your dashboard.";
+    } else if (rollingSleepAvg < 5.5) {
       reason = `Rolling sleep average is dangerously low (${rollingSleepAvg} hrs) combined with high stress and academic load.`;
       tip = "Prioritize sleep immediately. Set a strict boundary for study hours and turn off devices by 10 PM.";
     } else if (skippedMealsCount >= 2 || (totalFoodBudgetLimit > 0 && totalFoodBudgetSpend > totalFoodBudgetLimit)) {
@@ -127,7 +140,7 @@ const fallbackBurnoutAnalysis = (profile, financeData) => {
   return { riskLevel, reason, tip };
 };
 
-const getBurnoutAnalysis = async (profile, financeData) => {
+const getBurnoutAnalysis = async (profile, financeData, burnoutInfo) => {
   const openRouterKey = process.env.OPENROUTER_API_KEY;
   const openAIKey = process.env.OPENAI_API_KEY;
   
@@ -148,7 +161,7 @@ const getBurnoutAnalysis = async (profile, financeData) => {
   }
 
   if (!openai) {
-    return fallbackBurnoutAnalysis(profile, financeData);
+    return fallbackBurnoutAnalysis(profile, financeData, burnoutInfo);
   }
 
   try {
@@ -171,6 +184,11 @@ const getBurnoutAnalysis = async (profile, financeData) => {
       examWindowSpend = 0,
       totalSpend = 0
     } = financeData || {};
+
+    const {
+      burnoutPhase = false,
+      maxConsecutiveStressDays = 0
+    } = burnoutInfo || {};
 
     let daysUntilExam = "No exams scheduled";
     if (examDate && examDate !== "No exams scheduled") {
@@ -195,6 +213,7 @@ const getBurnoutAnalysis = async (profile, financeData) => {
       - Cravings: ${cravingType.join(", ")}
       - Study/coding hours per day: ${studyHours} hrs
       - Has job: ${hasJob ? "Yes" : "No"}
+      - Chronic Burnout Phase: ${burnoutPhase ? "Active" : "Inactive"} (${maxConsecutiveStressDays} consecutive check-ins with stress >= 4/5)
 
       Recent Daily Check-ins (Last 7 Days):
       ${recentCheckinsText || "No check-ins submitted yet."}
@@ -209,7 +228,9 @@ const getBurnoutAnalysis = async (profile, financeData) => {
       Classify their burnout risk. Provide the response strictly in JSON format with exactly three fields:
       "riskLevel": "Low", "Moderate", or "High"
       "reason": a 1-line description of the classification combining wellness & spending observations (e.g. "Frequent skipped meals and overspending on Doordash near exams")
-      "tip": a single actionable tip related to sleep, study schedule, or financial/spending habits
+      "tip": a single actionable tip related to sleep, study schedule, or financial/spending habits.
+      
+      CRITICAL INSTRUCTION: If Chronic Burnout Phase is Active, you MUST classify riskLevel as "High". The reason must state that chronic burnout is active due to sustained high stress levels, and the tip MUST recommend using the 4-7-8 breathing spacer modal on their dashboard to help them relax.
 
       Format:
       {
@@ -229,7 +250,7 @@ const getBurnoutAnalysis = async (profile, financeData) => {
     return JSON.parse(content);
   } catch (error) {
     console.error("Error generating burnout analysis from LLM:", error);
-    return fallbackBurnoutAnalysis(profile, financeData);
+    return fallbackBurnoutAnalysis(profile, financeData, burnoutInfo);
   }
 };
 
