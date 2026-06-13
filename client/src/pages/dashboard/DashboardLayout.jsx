@@ -9,12 +9,12 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
 const menuList = [
-  { name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
-  { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes" },
-  { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets" },
-  { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses" },
-  { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner" },
-  { name: "Wellness Profile", icon: Heart, path: "/dashboard/wellness" },
+  { name: "Dashboard", icon: LayoutGrid, path: "/dashboard", colorClass: "text-[#1c6cff]" },
+  { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes", colorClass: "text-[#00acfe]" },
+  { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets", colorClass: "text-[#00cc4b]" },
+  { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses", colorClass: "text-[#ff8833]" },
+  { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner", colorClass: "text-cyan-400" },
+  { name: "Wellness Profile", icon: Heart, path: "/dashboard/wellness", colorClass: "text-tag-coral" },
 ];
 
 export default function DashboardLayout() {
@@ -44,7 +44,7 @@ export default function DashboardLayout() {
             {menuList.map((menu, index) => (
               <Link to={menu.path} key={index}>
                 <div className={`nav-link ${path === menu.path ? "nav-link-active" : ""}`}>
-                  <menu.icon size={18} />
+                  <menu.icon size={18} className={path === menu.path ? "text-[#1c6cff]" : menu.colorClass} />
                   {menu.name}
                 </div>
               </Link>
