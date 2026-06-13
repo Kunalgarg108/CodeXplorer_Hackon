@@ -1,31 +1,62 @@
-import Link from "next/link";
 import React from "react";
 
-function IncomeItem({ budget }) {
-  const calculateProgressPerc = () => {
-    const perc = (budget.totalSpend / budget.amount) * 100;
-    return perc > 100 ? 100 : perc.toFixed(2);
-  };
+const TAG_COLORS = [
+  "#1c6cff", "#00cc4b", "#ff8833", "#00acfe", "#9019e6",
+  "#ffcc02", "#ff33aa", "#ea687c", "#94ae43", "#ff4433",
+];
+
+function IncomeItem({ budget, colorIdx = 0 }) {
+  const accent = TAG_COLORS[colorIdx % TAG_COLORS.length];
+
   return (
     <div
-      className="p-5 border rounded-2xl
-    hover:shadow-md cursor-pointer h-[170px]"
+      className="neo-card"
+      style={{ padding: "18px 20px" }}
     >
-      <div className="flex gap-2 items-center justify-between">
-        <div className="flex gap-2 items-center">
-          <h2
-            className="text-2xl p-3 px-4
-              bg-slate-100 rounded-full 
-              "
+      <div className="flex gap-3 items-center justify-between">
+        <div className="flex gap-3 items-center">
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: "14px",
+              background: `${accent}22`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "20px",
+              flexShrink: 0,
+            }}
           >
             {budget?.icon}
-          </h2>
+          </div>
           <div>
-            <h2 className="font-bold">{budget.name}</h2>
-            <h2 className="text-sm text-gray-500">{budget.totalItem} Item</h2>
+            <p
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 600,
+                fontSize: "14px",
+                color: "var(--color-paper-white)",
+                marginBottom: "2px",
+              }}
+            >
+              {budget.name}
+            </p>
+            <p style={{ fontSize: "11px", color: "var(--color-mist)", fontWeight: 300 }}>
+              {budget.totalItem} stream{budget.totalItem !== 1 ? "s" : ""}
+            </p>
           </div>
         </div>
-        <h2 className="font-bold text-primary text-lg"> ${budget.amount}</h2>
+        <span
+          style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 700,
+            fontSize: "15px",
+            color: accent,
+          }}
+        >
+          ${budget.amount}
+        </span>
       </div>
     </div>
   );

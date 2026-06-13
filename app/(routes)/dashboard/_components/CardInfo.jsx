@@ -9,6 +9,55 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
+// Copilot Money color tokens mapped to stat cards
+const STAT_COLORS = [
+  { accent: "#1c6cff", bg: "rgba(28,108,255,0.12)" },
+  { accent: "#ff4433", bg: "rgba(255,68,51,0.12)" },
+  { accent: "#00cc4b", bg: "rgba(0,204,75,0.12)" },
+  { accent: "#00acfe", bg: "rgba(0,172,254,0.12)" },
+];
+
+function StatCard({ label, value, icon: Icon, colorIdx = 0 }) {
+  const { accent, bg } = STAT_COLORS[colorIdx % STAT_COLORS.length];
+  return (
+    <div
+      className="neo-card flex items-center justify-between"
+      style={{ minHeight: 100 }}
+    >
+      <div>
+        <p style={{ color: "var(--color-mist)", fontSize: "12px", fontWeight: 300, marginBottom: 6 }}>
+          {label}
+        </p>
+        <p
+          style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: "1.75rem",
+            fontWeight: 700,
+            color: "var(--color-paper-white)",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          {value}
+        </p>
+      </div>
+      <div
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: "14px",
+          background: bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={22} style={{ color: accent }} />
+      </div>
+    </div>
+  );
+}
+
 function CardInfo({ budgetList, incomeList }) {
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpend, setTotalSpend] = useState(0);
@@ -24,31 +73,25 @@ function CardInfo({ budgetList, incomeList }) {
   useEffect(() => {
     if (totalBudget > 0 || totalIncome > 0 || totalSpend > 0) {
       const fetchFinancialAdvice = async () => {
-        const advice = await getFinancialAdvice(
-          totalBudget,
-          totalIncome,
-          totalSpend
-        );
+        const advice = await getFinancialAdvice(totalBudget, totalIncome, totalSpend);
         setFinancialAdvice(advice);
       };
-
       fetchFinancialAdvice();
     }
   }, [totalBudget, totalIncome, totalSpend]);
 
   const CalculateCardInfo = () => {
-    console.log(budgetList);
     let totalBudget_ = 0;
     let totalSpend_ = 0;
     let totalIncome_ = 0;
 
     budgetList.forEach((element) => {
-      totalBudget_ = totalBudget_ + Number(element.amount);
-      totalSpend_ = totalSpend_ + element.totalSpend;
+      totalBudget_ += Number(element.amount);
+      totalSpend_ += element.totalSpend;
     });
 
     incomeList.forEach((element) => {
-      totalIncome_ = totalIncome_ + element.totalAmount;
+      totalIncome_ += element.totalAmount;
     });
 
     setTotalIncome(totalIncome_);
@@ -60,70 +103,63 @@ function CardInfo({ budgetList, incomeList }) {
     <div>
       {budgetList?.length > 0 ? (
         <div>
-          <div className="p-7 border mt-4 -mb-1 rounded-2xl flex items-center justify-between">
-            <div className="">
-              <div className="flex mb-2 flex-row space-x-1 items-center ">
-                <h2 className="text-md ">Finan Smart AI</h2>
-                <Sparkles
-                  className="rounded-full text-white w-10 h-10 p-2
-    bg-gradient-to-r
-    from-pink-500
-    via-red-500
-    to-yellow-500
-    background-animate"
-                />
+          {/* AI Advice Card */}
+          <div
+            className="neo-card mt-4 mb-5 flex items-start gap-4"
+            style={{ background: "var(--color-indigo-surface)" }}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: "12px",
+                background: "linear-gradient(135deg, #ff4433, #ff33aa, #9019e6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Sparkles size={18} style={{ color: "#fff" }} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    color: "var(--color-paper-white)",
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  FinanSmart AI
+                </span>
               </div>
-              <h2 className="font-light text-md">
-                {financialAdvice || "Loading financial advice..."}
-              </h2>
+              <p style={{ color: "var(--color-fog)", fontSize: "14px", fontWeight: 300, lineHeight: 1.6 }}>
+                {financialAdvice || "Analyzing your financial data…"}
+              </p>
             </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">Total Budget</h2>
-                <h2 className="font-bold text-2xl">
-                  ${formatNumber(totalBudget)}
-                </h2>
-              </div>
-              <PiggyBank className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">Total Spend</h2>
-                <h2 className="font-bold text-2xl">
-                  ${formatNumber(totalSpend)}
-                </h2>
-              </div>
-              <ReceiptText className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">No. Of Budget</h2>
-                <h2 className="font-bold text-2xl">{budgetList?.length}</h2>
-              </div>
-              <Wallet className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">Sum of Income Streams</h2>
-                <h2 className="font-bold text-2xl">
-                  ${formatNumber(totalIncome)}
-                </h2>
-              </div>
-              <CircleDollarSign className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
+          {/* Stat cards grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard label="Total Budget" value={`$${formatNumber(totalBudget)}`} icon={PiggyBank} colorIdx={0} />
+            <StatCard label="Total Spent" value={`$${formatNumber(totalSpend)}`} icon={ReceiptText} colorIdx={1} />
+            <StatCard label="No. of Budgets" value={budgetList?.length} icon={Wallet} colorIdx={2} />
+            <StatCard label="Total Income" value={`$${formatNumber(totalIncome)}`} icon={CircleDollarSign} colorIdx={3} />
           </div>
         </div>
       ) : (
-        <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[1, 2, 3].map((item, index) => (
-            <div
-              className="h-[110px] w-full bg-slate-200 animate-pulse rounded-lg"
-              key={index}
-            ></div>
-          ))}
+        <div>
+          {/* AI advice skeleton */}
+          <div className="skeleton-dark mt-4 mb-5" style={{ height: 80 }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="skeleton-dark" style={{ height: 100 }} />
+            ))}
+          </div>
         </div>
       )}
     </div>

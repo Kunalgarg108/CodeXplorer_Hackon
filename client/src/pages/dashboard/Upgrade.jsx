@@ -1,18 +1,33 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Upgrade() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-center md:gap-8">
-        <div className="rounded-2xl border border-indigo-600 p-6 shadow-sm ring-1 ring-indigo-600 sm:order-last sm:px-8 lg:p-12">
+    <div className="p-6 md:p-10">
+      <p className="eyebrow text-xs mb-2">Plans</p>
+      <h2 className="display-section mb-10">Upgrade</h2>
+      <div className="mx-auto max-w-3xl grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="neo-card p-8">
           <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-900">Pro</h2>
-            <p className="mt-2 sm:mt-4">
-              <strong className="text-3xl font-bold text-gray-900 sm:text-4xl">30$</strong>
-              <span className="text-sm font-medium text-gray-700">/month</span>
-            </p>
+            <p className="eyebrow text-xs text-fog mb-2">Starter</p>
+            <p className="font-display font-semibold text-4xl text-paper">$20</p>
+            <span className="text-mist text-sm font-thin">/month</span>
           </div>
-          <ul className="mt-6 space-y-2 text-gray-700">
+          <ul className="mt-8 space-y-3 text-fog font-thin text-sm">
+            <li>✓ 10 users included</li>
+            <li>✓ 2GB of storage</li>
+            <li>✓ Email support</li>
+            <li>✓ Help center access</li>
+          </ul>
+          <Button variant="outline" className="mt-8 w-full">Get Started</Button>
+        </div>
+        <div className="neo-card-glow p-8 border-signal/30">
+          <div className="text-center">
+            <p className="eyebrow text-xs mb-2">Pro</p>
+            <p className="font-display font-semibold text-4xl text-paper">$30</p>
+            <span className="text-mist text-sm font-thin">/month</span>
+          </div>
+          <ul className="mt-8 space-y-3 text-fog font-thin text-sm">
             <li>✓ 20 users included</li>
             <li>✓ 5GB of storage</li>
             <li>✓ Email support</li>
@@ -20,27 +35,7 @@ export default function Upgrade() {
             <li>✓ Phone support</li>
             <li>✓ Community access</li>
           </ul>
-          <button className="mt-8 block w-full rounded-full border border-indigo-600 bg-indigo-600 px-12 py-3 text-center text-sm font-medium text-white">
-            Get Started
-          </button>
-        </div>
-        <div className="rounded-2xl border border-gray-200 p-6 shadow-sm sm:px-8 lg:p-12">
-          <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-900">Starter</h2>
-            <p className="mt-2 sm:mt-4">
-              <strong className="text-3xl font-bold text-gray-900 sm:text-4xl">20$</strong>
-              <span className="text-sm font-medium text-gray-700">/month</span>
-            </p>
-          </div>
-          <ul className="mt-6 space-y-2 text-gray-700">
-            <li>✓ 10 users included</li>
-            <li>✓ 2GB of storage</li>
-            <li>✓ Email support</li>
-            <li>✓ Help center access</li>
-          </ul>
-          <button className="mt-8 block w-full rounded-full border border-indigo-600 bg-white px-12 py-3 text-center text-sm font-medium text-indigo-600">
-            Get Started
-          </button>
+          <Button className="mt-8 w-full">Get Started</Button>
         </div>
       </div>
     </div>

@@ -17,8 +17,9 @@ export default function Expenses() {
   }, [user]);
 
   return (
-    <div className="p-10">
-      <h2 className="font-bold text-3xl">My Expenses</h2>
+    <div className="p-6 md:p-10">
+      <p className="eyebrow text-xs mb-2">Expenses</p>
+      <h2 className="display-section mb-8">My Expenses</h2>
       <ExpenseListTable refreshData={getAllExpenses} expensesList={expensesList} />
     </div>
   );

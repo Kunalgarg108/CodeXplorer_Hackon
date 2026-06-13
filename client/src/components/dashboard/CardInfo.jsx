@@ -35,54 +35,42 @@ export default function CardInfo({ budgetList, incomeList }) {
     }
   }, [totalBudget, totalIncome, totalSpend]);
 
+  const statCards = [
+    { label: "Total Budget", value: `$${formatNumber(totalBudget)}`, icon: PiggyBank },
+    { label: "Total Spend", value: `$${formatNumber(totalSpend)}`, icon: ReceiptText },
+    { label: "No. Of Budget", value: budgetList?.length, icon: Wallet },
+    { label: "Sum of Income Streams", value: `$${formatNumber(totalIncome)}`, icon: CircleDollarSign },
+  ];
+
   return (
     <div>
       {budgetList?.length > 0 ? (
         <div>
-          <div className="p-7 border mt-4 -mb-1 rounded-2xl flex items-center justify-between">
+          <div className="neo-card-glow mt-6 -mb-1 flex items-center justify-between">
             <div>
-              <div className="flex mb-2 flex-row space-x-1 items-center">
-                <h2 className="text-md">Finan Smart AI</h2>
-                <Sparkles className="rounded-full text-white w-10 h-10 p-2 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 background-animate" />
+              <div className="flex mb-2 items-center gap-2">
+                <p className="eyebrow text-xs">Finan Smart AI</p>
+                <Sparkles className="w-8 h-8 p-1.5 text-paper bg-signal rounded-tag shadow-neo" />
               </div>
-              <h2 className="font-light text-md">{financialAdvice || "Loading financial advice..."}</h2>
+              <p className="body-thin text-fog text-sm md:text-base">{financialAdvice || "Loading financial advice..."}</p>
             </div>
           </div>
-          <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">Total Budget</h2>
-                <h2 className="font-bold text-2xl">${formatNumber(totalBudget)}</h2>
+          <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+            {statCards.map((card) => (
+              <div key={card.label} className="neo-card flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-mist font-thin uppercase tracking-wider">{card.label}</p>
+                  <p className="font-display font-semibold text-2xl text-paper mt-1">{card.value}</p>
+                </div>
+                <card.icon className="icon-well" />
               </div>
-              <PiggyBank className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">Total Spend</h2>
-                <h2 className="font-bold text-2xl">${formatNumber(totalSpend)}</h2>
-              </div>
-              <ReceiptText className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">No. Of Budget</h2>
-                <h2 className="font-bold text-2xl">{budgetList?.length}</h2>
-              </div>
-              <Wallet className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
-            <div className="p-7 border rounded-2xl flex items-center justify-between">
-              <div>
-                <h2 className="text-sm">Sum of Income Streams</h2>
-                <h2 className="font-bold text-2xl">${formatNumber(totalIncome)}</h2>
-              </div>
-              <CircleDollarSign className="bg-blue-800 p-3 h-12 w-12 rounded-full text-white" />
-            </div>
+            ))}
           </div>
         </div>
       ) : (
         <div className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3].map((item) => (
-            <div key={item} className="h-[110px] w-full bg-slate-200 animate-pulse rounded-lg" />
+            <div key={item} className="h-[110px] w-full skeleton-pulse" />
           ))}
         </div>
       )}

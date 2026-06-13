@@ -8,23 +8,22 @@ import { Budgets, Expenses, Incomes } from "@/utils/schema";
 import BarChartDashboard from "./_components/BarChartDashboard";
 import BudgetItem from "./budgets/_components/BudgetItem";
 import ExpenseListTable from "./expenses/_components/ExpenseListTable";
+
 function Dashboard() {
   const { user } = useUser();
 
   const [budgetList, setBudgetList] = useState([]);
   const [incomeList, setIncomeList] = useState([]);
   const [expensesList, setExpensesList] = useState([]);
+
   useEffect(() => {
     user && getBudgetList();
   }, [user]);
-  /**
-   * used to get budget List
-   */
+
   const getBudgetList = async () => {
     const result = await db
       .select({
         ...getTableColumns(Budgets),
-
         totalSpend: sql`sum(${Expenses.amount})`.mapWith(Number),
         totalItem: sql`count(${Expenses.id})`.mapWith(Number),
       })
@@ -38,30 +37,21 @@ function Dashboard() {
     getIncomeList();
   };
 
-  /**
-   * Get Income stream list
-   */
   const getIncomeList = async () => {
     try {
       const result = await db
         .select({
           ...getTableColumns(Incomes),
-          totalAmount: sql`SUM(CAST(${Incomes.amount} AS NUMERIC))`.mapWith(
-            Number
-          ),
+          totalAmount: sql`SUM(CAST(${Incomes.amount} AS NUMERIC))`.mapWith(Number),
         })
         .from(Incomes)
-        .groupBy(Incomes.id); // Assuming you want to group by ID or any other relevant column
-
+        .groupBy(Incomes.id);
       setIncomeList(result);
     } catch (error) {
       console.error("Error fetching income list:", error);
     }
   };
 
-  /**
-   * Used to get All expenses belong to users
-   */
   const getAllExpenses = async () => {
     const result = await db
       .select({
@@ -78,34 +68,70 @@ function Dashboard() {
   };
 
   return (
-    <div className="p-8 bg-">
-      <h2 className="font-bold text-4xl">Hi, {user?.fullName} 👋</h2>
-      <p className="text-gray-500">
-        Here's what happenning with your money, Lets Manage your expense
-      </p>
+    <div
+      style={{
+        background: "var(--color-midnight-canvas)",
+        minHeight: "100vh",
+        padding: "32px",
+      }}
+    >
+      {/* Page header */}
+      <div style={{ marginBottom: "28px" }}>
+        <h1
+          style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: "2rem",
+            fontWeight: 700,
+            color: "var(--color-paper-white)",
+            letterSpacing: "-0.02em",
+            marginBottom: "6px",
+          }}
+        >
+          Hi, {user?.fullName} 👋
+        </h1>
+        <p style={{ color: "var(--color-mist)", fontSize: "14px", fontWeight: 300 }}>
+          Here's what's happening with your money. Let's manage your expenses.
+        </p>
+      </div>
 
+      {/* Stat cards + AI advice */}
       <CardInfo budgetList={budgetList} incomeList={incomeList} />
+
+      {/* Main content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 mt-6 gap-5">
+        {/* Left: chart + expense table */}
         <div className="lg:col-span-2">
           <BarChartDashboard budgetList={budgetList} />
-
           <ExpenseListTable
             expensesList={expensesList}
             refreshData={() => getBudgetList()}
           />
         </div>
-        <div className="grid gap-5">
-          <h2 className="font-bold text-lg">Latest Budgets</h2>
-          {budgetList?.length > 0
-            ? budgetList.map((budget, index) => (
-                <BudgetItem budget={budget} key={index} />
-              ))
-            : [1, 2, 3, 4].map((item, index) => (
-                <div
-                  className="h-[180xp] w-full
-                 bg-slate-200 rounded-lg animate-pulse"
-                ></div>
-              ))}
+
+        {/* Right: latest budgets */}
+        <div>
+          <h2
+            style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "var(--color-fog)",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              marginBottom: "16px",
+            }}
+          >
+            Latest Budgets
+          </h2>
+          <div className="flex flex-col gap-3">
+            {budgetList?.length > 0
+              ? budgetList.map((budget, index) => (
+                  <BudgetItem budget={budget} key={index} />
+                ))
+              : [1, 2, 3, 4].map((item, index) => (
+                  <div key={index} className="skeleton-dark" style={{ height: 100 }} />
+                ))}
+          </div>
         </div>
       </div>
     </div>

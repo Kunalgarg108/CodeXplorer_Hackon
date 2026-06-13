@@ -13,7 +13,7 @@ import Upgrade from "./pages/dashboard/Upgrade";
 
 function ProtectedRoute({ children }) {
   const { isSignedIn, loading } = useAuth();
-  if (loading) return <div className="p-10">Loading...</div>;
+  if (loading) return <div className="min-h-screen bg-midnight flex items-center justify-center text-fog font-thin">Loading...</div>;
   if (!isSignedIn) return <Navigate to="/sign-in" replace />;
   return children;
 }
