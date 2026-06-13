@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, CircleDollarSign,
+  LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, CircleDollarSign, ScanLine,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
@@ -12,6 +12,7 @@ const menuList = [
   { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes" },
   { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets" },
   { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses" },
+  { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner" },
   { name: "Upgrade", icon: ShieldCheck, path: "/dashboard/upgrade" },
 ];
 
