@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import WellnessSurvey from "@/components/WellnessSurvey";
 
 export default function SignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -19,13 +21,24 @@ export default function SignUp() {
     try {
       await register(name, email, password);
       toast("Account created!");
-      navigate("/dashboard");
+      setShowSurvey(true);
     } catch (err) {
       toast.error(err.message);
-    } finally {
       setLoading(false);
     }
   };
+
+  const handleFinishSurvey = () => {
+    navigate("/dashboard");
+  };
+
+  if (showSurvey) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-midnight p-4">
+        <WellnessSurvey onComplete={handleFinishSurvey} onSkip={handleFinishSurvey} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-midnight p-4">

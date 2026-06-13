@@ -8,6 +8,7 @@ import incomeRoutes from "./routes/incomes.js";
 import expenseRoutes from "./routes/expenses.js";
 import adviceRoutes from "./routes/advice.js";
 import menuRoutes from "./routes/menu.js";
+import wellnessRoutes from "./routes/wellness.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use("/api/incomes", incomeRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/advice", adviceRoutes);
 app.use("/api/menu", menuRoutes);
+app.use("/api/wellness", wellnessRoutes);
 
 const start = async () => {
   try {
