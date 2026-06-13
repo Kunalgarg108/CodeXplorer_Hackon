@@ -11,6 +11,7 @@ import Expenses from "./pages/dashboard/Expenses";
 import ExpenseDetail from "./pages/dashboard/ExpenseDetail";
 import MenuScanner from "./pages/dashboard/MenuScanner";
 import Wellness from "./pages/dashboard/Wellness";
+import PocketBuddy from "./pages/dashboard/PocketBuddy";
 
 function ProtectedRoute({ children }) {
   const { isSignedIn, loading } = useAuth();
@@ -34,6 +35,7 @@ export default function App() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="pocket-buddy" element={<PocketBuddy />} />
         <Route path="budgets" element={<Budgets />} />
         <Route path="incomes" element={<Incomes />} />
         <Route path="expenses" element={<Expenses />} />

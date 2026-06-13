@@ -4,8 +4,7 @@ import { toast } from "sonner";
 import { menuApi } from "@/lib/menuApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import SmartBudgetAlerts from "@/components/dashboard/SmartBudgetAlerts";
-import AiFinancialChat from "@/components/dashboard/AiFinancialChat";
+import AiFoodRecommendations from "@/components/dashboard/AiFoodRecommendations";
 
 const POLL_INTERVAL_MS = 3000;
 const TERMINAL_STATUSES = ["completed", "failed"];
@@ -52,10 +51,8 @@ export default function MenuScanner() {
       setImagePreview(null);
       return undefined;
     }
-
     const previewUrl = URL.createObjectURL(imageFile);
     setImagePreview(previewUrl);
-
     return () => URL.revokeObjectURL(previewUrl);
   }, [imageFile]);
 
@@ -104,19 +101,16 @@ export default function MenuScanner() {
   const handleImageChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith("image/")) {
       toast.error("Please select a valid image file.");
       return;
     }
-
     setImageFile(file);
     setError(null);
   };
 
   const handleUpload = async (event) => {
     event.preventDefault();
-
     if (!restaurantName.trim()) {
       setError("Restaurant name is required.");
       return;
@@ -148,24 +142,12 @@ export default function MenuScanner() {
   };
 
   const isProcessing =
-    jobId &&
-    jobStatus &&
-    !TERMINAL_STATUSES.includes(String(jobStatus).toLowerCase());
+    jobId && jobStatus && !TERMINAL_STATUSES.includes(String(jobStatus).toLowerCase());
 
   const canSubmit = restaurantName.trim() && imageFile && !uploading && !isProcessing;
 
   return (
     <div className="p-6 md:p-10 max-w-4xl">
-      {/* Smart Budget Alerts */}
-      <div className="mb-8">
-        <SmartBudgetAlerts />
-      </div>
-
-      {/* AI Financial Assistant Chat */}
-      <div className="mb-8">
-        <AiFinancialChat />
-      </div>
-
       <p className="eyebrow text-xs mb-2">Menu Scanner</p>
       <h2 className="display-section mb-2">Scan Restaurant Menu</h2>
       <p className="text-fog font-thin mb-8 max-w-2xl">
@@ -301,12 +283,12 @@ export default function MenuScanner() {
                     <div className="md:contents">
                       <div className="flex justify-between md:block gap-4 mb-2 md:mb-0">
                         <span className="text-mist text-xs uppercase md:hidden">Item Name</span>
-                        <span className="text-paper font-thin text-sm">{item.name || item.itemName || "—"}</span>
+                        <span className="text-paper font-thin text-sm">{item.name || "—"}</span>
                       </div>
                       <div className="flex justify-between md:block gap-4 mb-2 md:mb-0">
                         <span className="text-mist text-xs uppercase md:hidden">Price</span>
                         <span className="text-signal font-thin text-sm">
-                          {item.price != null ? (String(item.price).startsWith("$") ? item.price : `$${item.price}`) : "—"}
+                          {item.price != null ? `$${item.price}` : "—"}
                         </span>
                       </div>
                       <div className="flex justify-between md:block gap-4">
@@ -323,6 +305,9 @@ export default function MenuScanner() {
           </div>
         </div>
       )}
+
+      {/* AI Food Recommendations */}
+      <AiFoodRecommendations />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import menuRoutes from "./routes/menu.js";
 import wellnessRoutes from "./routes/wellness.js";
 import budgetAlertRoutes from "./routes/budgetAlerts.js";
 import chatRoutes from "./routes/chat.js";
+import foodRecommendationRoutes from "./routes/foodRecommendations.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/wellness", wellnessRoutes);
 app.use("/api/budget-alerts", budgetAlertRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/food-recommendations", foodRecommendationRoutes);
 
 
 

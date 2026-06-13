@@ -44,6 +44,8 @@ export const api = {
 
   sendChatMessage: (body) => request("/chat", { method: "POST", body: JSON.stringify(body) }),
 
+  getFoodRecommendations: () => request("/food-recommendations"),
+
   getWellnessProfile: () => request("/wellness"),
   updateWellnessProfile: (body) => request("/wellness", { method: "PUT", body: JSON.stringify(body) }),
   analyzeBurnout: () => request("/wellness/analyze"),

@@ -308,7 +308,7 @@ export default function WellnessSurvey({ onComplete, onSkip }) {
       {/* STEP 6: Stress Level */}
       {step === 6 && (
         <div className="space-y-4">
-          <h2 className="font-display font-medium text-xl text-paper font-semibold">How would you rate your current stress level?</h2>
+          <h2 className="font-display font-semibold text-xl text-paper font-semibold">How would you rate your current stress level?</h2>
           <div className="flex justify-between gap-3 pt-3">
             {STRESS_LEVELS.map((s) => {
               const active = data.stressLevel === s.val;
