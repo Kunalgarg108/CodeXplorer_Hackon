@@ -147,9 +147,11 @@ const getBurnoutAnalysis = async (profile, financeData, burnoutInfo) => {
   let openai = null;
   let modelName = "gpt-4o-mini";
 
-  if (openRouterKey) {
+  const isOrKey = (key) => key && key.startsWith("sk-or-v1-");
+
+  if (openRouterKey || isOrKey(openAIKey)) {
     openai = new OpenAI({
-      apiKey: openRouterKey,
+      apiKey: openRouterKey || openAIKey,
       baseURL: "https://openrouter.ai/api/v1",
       dangerouslyAllowBrowser: true
     });
@@ -243,7 +245,8 @@ const getBurnoutAnalysis = async (profile, financeData, burnoutInfo) => {
     const chatCompletion = await openai.chat.completions.create({
       model: modelName,
       messages: [{ role: "user", content: userPrompt }],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      max_tokens: 1000
     });
 
     const content = chatCompletion.choices[0].message.content;

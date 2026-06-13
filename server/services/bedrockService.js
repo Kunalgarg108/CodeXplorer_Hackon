@@ -4,6 +4,7 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
+import OpenAI from "openai";
 
 const EXTRACTION_PROMPT = `Extract menu items from this restaurant menu image.
 
@@ -73,68 +74,164 @@ const normalizeItems = (items) =>
 
 export const extractMenuItemsFromImage = async (imagePath) => {
   const region = process.env.AWS_REGION;
-  const modelId =
+  let modelId =
     process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-5-sonnet-20241022-v2:0";
 
-  if (!region) {
-    throw new Error("AWS_REGION is not configured");
+  // Automatically prepend "us." to Amazon Nova models for on-demand routing
+  if (modelId.startsWith("amazon.nova")) {
+    modelId = `us.${modelId}`;
   }
 
-  const client = new BedrockRuntimeClient({ region });
   const imageBuffer = await fs.readFile(imagePath);
   const base64Image = imageBuffer.toString("base64");
   const mediaType = getMediaType(imagePath);
 
-  const body = {
-    anthropic_version: "bedrock-2023-05-31",
-    max_tokens: 4096,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: mediaType,
-              data: base64Image,
-            },
-          },
-          {
-            type: "text",
-            text: EXTRACTION_PROMPT,
-          },
-        ],
-      },
-    ],
+  const processExtractedText = (text) => {
+    if (!text) {
+      throw new Error("Empty response from model");
+    }
+
+    const parsed = parseJsonResponse(text);
+
+    if (!Array.isArray(parsed.items)) {
+      throw new Error("Invalid menu extraction response");
+    }
+
+    const items = normalizeItems(parsed.items);
+
+    if (items.length === 0) {
+      throw new Error("No menu items extracted from image");
+    }
+
+    return items;
   };
 
-  const command = new InvokeModelCommand({
-    modelId,
-    contentType: "application/json",
-    accept: "application/json",
-    body: JSON.stringify(body),
-  });
+  // Try AWS Bedrock first if region is configured
+  if (region) {
+    try {
+      console.log(`[BedrockService] Attempting to invoke AWS Bedrock with model ${modelId} in region ${region}...`);
+      const client = new BedrockRuntimeClient({ region });
+      const isNova = modelId.includes("amazon.nova");
+      let body;
 
-  const response = await client.send(command);
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-  const text = responseBody.content?.[0]?.text;
+      if (isNova) {
+        let format = "jpeg";
+        if (mediaType === "image/png") format = "png";
+        else if (mediaType === "image/webp") format = "webp";
+        else if (mediaType === "image/gif") format = "gif";
 
-  if (!text) {
-    throw new Error("Empty response from Bedrock");
+        body = {
+          schemaVersion: "messages-v1",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  image: {
+                    format,
+                    source: {
+                      bytes: base64Image,
+                    },
+                  },
+                },
+                {
+                  text: EXTRACTION_PROMPT,
+                },
+              ],
+            },
+          ],
+          inferenceConfig: {
+            maxTokens: 4096,
+            temperature: 0,
+          },
+        };
+      } else {
+        body = {
+          anthropic_version: "bedrock-2023-05-31",
+          max_tokens: 4096,
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: mediaType,
+                    data: base64Image,
+                  },
+                },
+                {
+                  type: "text",
+                  text: EXTRACTION_PROMPT,
+                },
+              ],
+            },
+          ],
+        };
+      }
+
+      const command = new InvokeModelCommand({
+        modelId,
+        contentType: "application/json",
+        accept: "application/json",
+        body: JSON.stringify(body),
+      });
+
+      const response = await client.send(command);
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      const text = isNova
+        ? responseBody.output?.message?.content?.[0]?.text
+        : responseBody.content?.[0]?.text;
+
+      return processExtractedText(text);
+    } catch (bedrockError) {
+      console.warn(`[BedrockService] AWS Bedrock invocation failed: ${bedrockError.message}`);
+      console.log(`[BedrockService] Attempting to fall back to OpenRouter/Gemini...`);
+    }
+  } else {
+    console.log(`[BedrockService] AWS_REGION not configured, attempting to use OpenRouter...`);
   }
 
-  const parsed = parseJsonResponse(text);
-
-  if (!Array.isArray(parsed.items)) {
-    throw new Error("Invalid menu extraction response");
+  // Fallback to OpenRouter (multimodal Gemini 2.5 Flash)
+  const openRouterKey = process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY;
+  if (!openRouterKey) {
+    throw new Error("AWS Bedrock failed and no OpenRouter/OpenAI API key configured for fallback.");
   }
 
-  const items = normalizeItems(parsed.items);
+  try {
+    const openai = new OpenAI({
+      apiKey: openRouterKey,
+      baseURL: "https://openrouter.ai/api/v1",
+      dangerouslyAllowBrowser: true,
+    });
 
-  if (items.length === 0) {
-    throw new Error("No menu items extracted from image");
+    const response = await openai.chat.completions.create({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: EXTRACTION_PROMPT,
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mediaType};base64,${base64Image}`,
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 1000,
+    });
+
+    const text = response.choices[0].message.content;
+    return processExtractedText(text);
+  } catch (openRouterError) {
+    console.error(`[BedrockService] OpenRouter fallback also failed:`, openRouterError.message);
+    throw new Error(`Menu extraction failed. Bedrock error or OpenRouter fallback failure: ${openRouterError.message}`);
   }
-
-  return items;
 };
