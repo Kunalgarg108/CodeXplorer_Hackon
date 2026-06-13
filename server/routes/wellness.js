@@ -164,9 +164,37 @@ router.get("/analyze", auth, async (req, res) => {
       totalSpend
     };
 
-    // Run burnout analysis combining profile + checkins + finance data
-    const analysis = await getBurnoutAnalysis(profile, financeData);
-    res.json(analysis);
+    // Calculate if user has logged stressLevel >= 4 for 3 consecutive check-ins
+    const checkins = profile.dailyCheckins || [];
+    const sortedCheckins = [...checkins].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    let consecutiveStressDays = 0;
+    let maxConsecutiveStressDays = 0;
+    let burnoutPhase = false;
+
+    sortedCheckins.forEach((c) => {
+      if (c.stressLevel >= 4) {
+        consecutiveStressDays++;
+        if (consecutiveStressDays > maxConsecutiveStressDays) {
+          maxConsecutiveStressDays = consecutiveStressDays;
+        }
+      } else {
+        consecutiveStressDays = 0;
+      }
+    });
+
+    if (maxConsecutiveStressDays >= 3) {
+      burnoutPhase = true;
+    }
+
+    // Run burnout analysis combining profile + checkins + finance data + burnout flag
+    const analysis = await getBurnoutAnalysis(profile, financeData, { burnoutPhase, maxConsecutiveStressDays });
+    
+    res.json({
+      ...analysis,
+      burnoutPhase,
+      consecutiveStressDays: maxConsecutiveStressDays
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
