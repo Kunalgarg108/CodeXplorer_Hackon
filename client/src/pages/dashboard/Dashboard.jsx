@@ -57,6 +57,16 @@ export default function Dashboard() {
     }
   };
 
+  const handleCloseBreathing = async () => {
+    setIsBreathingOpen(false);
+    try {
+      await api.resolveBurnout();
+      await loadWellness();
+    } catch (err) {
+      console.error("Failed to resolve burnout phase:", err);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       loadData();
@@ -96,10 +106,13 @@ export default function Dashboard() {
             </span>
             <div>
               <h4 className="text-sm font-bold text-[#ff4433] font-display flex items-center gap-1.5">
-                🚨 Chronic Burnout Warning Active
+                {burnoutAnalysis?.isRecurrent ? "⚠️ Recurrent Burnout Alarm" : "🚨 Chronic Burnout Warning Active"}
               </h4>
               <p className="text-xs text-fog font-thin mt-1">
-                You've recorded high stress (&ge; 4/5) for {burnoutAnalysis?.consecutiveStressDays || 3} consecutive check-ins. Let's reset.
+                {burnoutAnalysis?.isRecurrent 
+                  ? "This is a repeating burnout phase. Please take a longer break and focus on self-care."
+                  : `You've recorded high stress (&ge; 4/5) for ${burnoutAnalysis?.consecutiveStressDays || 3} consecutive check-ins. Let's reset.`
+                }
               </p>
             </div>
           </div>
@@ -193,7 +206,7 @@ export default function Dashboard() {
       </div>
 
       {/* Breathing Spacer Modal */}
-      <BreathingSpacer isOpen={isBreathingOpen} onClose={() => setIsBreathingOpen(false)} />
+      <BreathingSpacer isOpen={isBreathingOpen} onClose={handleCloseBreathing} />
     </div>
   );
 }

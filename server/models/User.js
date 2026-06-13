@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
       studyHours: { type: Number, default: 6 },
       hasJob: { type: Boolean, default: false },
       surveyCompleted: { type: Boolean, default: false },
+      lastResolvedBurnout: { type: Date, default: null },
       dailyCheckins: [
         {
           date: { type: Date, default: Date.now },

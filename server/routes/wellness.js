@@ -81,6 +81,28 @@ router.post("/checkin", auth, async (req, res) => {
   }
 });
 
+// POST /api/wellness/resolve-burnout - resolve current burnout phase
+router.post("/resolve-burnout", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user.wellnessProfile) {
+      user.wellnessProfile = {};
+    }
+
+    user.wellnessProfile.lastResolvedBurnout = new Date();
+    await user.save();
+
+    res.json({
+      message: "Burnout phase resolved",
+      lastResolvedBurnout: user.wellnessProfile.lastResolvedBurnout
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // GET /api/wellness/analyze - perform burnout risk analysis
 router.get("/analyze", auth, async (req, res) => {
   try {
@@ -98,6 +120,7 @@ router.get("/analyze", auth, async (req, res) => {
       studyHours: 6,
       hasJob: false,
       surveyCompleted: false,
+      lastResolvedBurnout: null,
       dailyCheckins: []
     };
 
@@ -165,8 +188,16 @@ router.get("/analyze", auth, async (req, res) => {
     };
 
     // Calculate if user has logged stressLevel >= 4 for 3 consecutive check-ins
+    const lastResolved = profile.lastResolvedBurnout ? new Date(profile.lastResolvedBurnout) : null;
     const checkins = profile.dailyCheckins || [];
-    const sortedCheckins = [...checkins].sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // Filter check-ins to only look at entries logged after lastResolved
+    let filteredCheckins = [...checkins];
+    if (lastResolved) {
+      filteredCheckins = checkins.filter(c => new Date(c.date) > lastResolved);
+    }
+    
+    const sortedCheckins = filteredCheckins.sort((a, b) => new Date(a.date) - new Date(b.date));
     
     let consecutiveStressDays = 0;
     let maxConsecutiveStressDays = 0;
@@ -187,13 +218,23 @@ router.get("/analyze", auth, async (req, res) => {
       burnoutPhase = true;
     }
 
+    // Determine recurrence escalation (if next burnout triggers within 7 days of resolving the previous one)
+    let isRecurrent = false;
+    if (burnoutPhase && lastResolved) {
+      const daysSinceResolution = (new Date() - lastResolved) / (1000 * 60 * 60 * 24);
+      if (daysSinceResolution < 7) {
+        isRecurrent = true;
+      }
+    }
+
     // Run burnout analysis combining profile + checkins + finance data + burnout flag
     const analysis = await getBurnoutAnalysis(profile, financeData, { burnoutPhase, maxConsecutiveStressDays });
     
     res.json({
       ...analysis,
       burnoutPhase,
-      consecutiveStressDays: maxConsecutiveStressDays
+      consecutiveStressDays: maxConsecutiveStressDays,
+      isRecurrent
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
