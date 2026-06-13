@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import FloatingTags from "@/components/FloatingTags";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import { Lightbulb, Layers, Receipt, Coins, AreaChart, ShieldCheck } from "lucide-react";
 
 /* ─── tiny scroll-reveal hook ─── */
 function useReveal() {
@@ -186,37 +187,37 @@ function MockDashboard() {
 /* ─── feature cards data ─── */
 const FEATURES = [
   {
-    icon: "💡",
+    icon: Lightbulb,
     title: "AI Financial Advice",
     desc: "Get real-time, personalized guidance powered by AI — tailored to your actual spending and income data.",
     accent: "#1c6cff",
   },
   {
-    icon: "📊",
+    icon: Layers,
     title: "Budget Tracking",
     desc: "Create budgets, assign them emoji categories, and watch a live progress bar fill as you spend.",
     accent: "#00cc4b",
   },
   {
-    icon: "💸",
+    icon: Receipt,
     title: "Expense Management",
     desc: "Log every expense in seconds. Delete, review and analyze what's draining your wallet the most.",
     accent: "#ff8833",
   },
   {
-    icon: "💰",
+    icon: Coins,
     title: "Income Streams",
     desc: "Track multiple income sources side by side. Know exactly what's coming in every month.",
     accent: "#00acfe",
   },
   {
-    icon: "📈",
+    icon: AreaChart,
     title: "Visual Analytics",
     desc: "Bar charts and progress meters turn raw numbers into instant visual insight at a glance.",
     accent: "#ff33aa",
   },
   {
-    icon: "🔒",
+    icon: ShieldCheck,
     title: "Secure & Private",
     desc: "Your financial data stays yours. Authentication-protected routes and encrypted storage.",
     accent: "#9019e6",
@@ -224,7 +225,7 @@ const FEATURES = [
 ];
 
 /* ─── FeatureCard ─── */
-function FeatureCard({ icon, title, desc, accent, index }) {
+function FeatureCard({ icon: Icon, title, desc, accent, index }) {
   const [ref, visible] = useReveal();
   return (
     <div
@@ -251,12 +252,11 @@ function FeatureCard({ icon, title, desc, accent, index }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 22,
           marginBottom: 16,
           border: `1px solid ${accent}44`,
         }}
       >
-        {icon}
+        <Icon style={{ width: 22, height: 22, color: accent }} />
       </div>
       <h3
         style={{
