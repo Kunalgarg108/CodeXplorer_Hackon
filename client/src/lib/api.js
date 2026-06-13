@@ -49,6 +49,7 @@ export const api = {
   getWellnessProfile: () => request("/wellness"),
   updateWellnessProfile: (body) => request("/wellness", { method: "PUT", body: JSON.stringify(body) }),
   analyzeBurnout: () => request("/wellness/analyze"),
+  analyzeWeeklyReport: () => request("/wellness/weekly"),
   submitDailyCheckin: (body) => request("/wellness/checkin", { method: "POST", body: JSON.stringify(body) }),
   resolveBurnout: () => request("/wellness/resolve-burnout", { method: "POST" }),
 };

@@ -4,6 +4,7 @@ import Budget from "../models/Budget.js";
 import Expense from "../models/Expense.js";
 import { auth } from "../middleware/auth.js";
 import getBurnoutAnalysis from "../utils/getBurnoutAnalysis.js";
+import { getWeeklyAnalysis } from "../utils/getWeeklyAnalysis.js";
 
 const router = express.Router();
 
@@ -236,6 +237,29 @@ router.get("/analyze", auth, async (req, res) => {
       consecutiveStressDays: maxConsecutiveStressDays,
       isRecurrent
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET /api/wellness/weekly - perform weekly wellness report analysis
+router.get("/weekly", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const checkins = user.wellnessProfile?.dailyCheckins || [];
+    if (checkins.length === 0) {
+      return res.json({
+        summary: "No daily check-ins submitted yet. Check in from your Dashboard page to generate a weekly wellness report!",
+        trendDirection: "flat",
+        trendPercentage: 0,
+        source: "Quick Analysis"
+      });
+    }
+
+    const analysis = await getWeeklyAnalysis(checkins);
+    res.json(analysis);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
