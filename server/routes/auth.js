@@ -28,7 +28,7 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, wellnessProfile: user.wellnessProfile },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -50,7 +50,7 @@ router.post("/login", async (req, res) => {
     const token = createToken(user);
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, wellnessProfile: user.wellnessProfile },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -68,7 +68,7 @@ router.get("/me", async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "dev-secret");
     const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({ user: { id: user._id, name: user.name, email: user.email } });
+    res.json({ user: { id: user._id, name: user.name, email: user.email, wellnessProfile: user.wellnessProfile } });
   } catch {
     res.status(401).json({ message: "Invalid token" });
   }
