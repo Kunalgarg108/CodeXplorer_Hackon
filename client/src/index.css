@@ -223,7 +223,7 @@
   .progress-fill.danger { background: #ff4433; }
 
   /* Tables */
-  .table-header {
+  .expense-table-header {
     display: grid;
     grid-template-columns: 1fr 100px 110px 70px;
     padding: 10px 16px;
@@ -236,7 +236,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-  .table-row {
+  .expense-table-row {
     display: grid;
     grid-template-columns: 1fr 100px 110px 70px;
     align-items: center;
@@ -248,8 +248,8 @@
     color: #ffffff;
     transition: background 0.15s ease;
   }
-  .table-row:last-child { border-bottom: none; border-radius: 0 0 16px 16px; }
-  .table-row:hover { background: rgba(28,108,255,0.04); }
+  .expense-table-row:last-child { border-bottom: none; border-radius: 0 0 16px 16px; }
+  .expense-table-row:hover { background: rgba(28,108,255,0.04); }
 
   /* Skeleton */
   .skeleton-pulse {
