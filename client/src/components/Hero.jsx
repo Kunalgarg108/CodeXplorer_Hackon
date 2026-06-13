@@ -75,9 +75,6 @@ function MockDashboard() {
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
             <Heart className="w-3.5 h-3.5 text-tag-coral" /> Wellness Profile
           </div>
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#9019e6]" /> Upgrade
-          </div>
         </div>
         <div className="pt-4 border-t border-[#11263b]/40 flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-[#1c6cff]/20 flex items-center justify-center text-[10px] font-bold text-[#1c6cff] border border-[#1c6cff]/30">
@@ -85,7 +82,7 @@ function MockDashboard() {
           </div>
           <div>
             <div className="font-semibold text-[10px]">John Doe</div>
-            <div className="text-[8px] text-mist">Premium Member</div>
+            <div className="text-[8px] text-mist">Active User</div>
           </div>
         </div>
       </div>
