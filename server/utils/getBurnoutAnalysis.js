@@ -137,7 +137,7 @@ const fallbackBurnoutAnalysis = (profile, financeData, burnoutInfo) => {
     tip = "Great job! Keep monitoring your budget limits and maintain a consistent sleep routine.";
   }
 
-  return { riskLevel, reason, tip };
+  return { riskLevel, reason, tip, source: "Quick Analysis" };
 };
 
 const getBurnoutAnalysis = async (profile, financeData, burnoutInfo) => {
@@ -250,10 +250,18 @@ const getBurnoutAnalysis = async (profile, financeData, burnoutInfo) => {
     });
 
     const content = chatCompletion.choices[0].message.content;
-    return JSON.parse(content);
+    const parsed = JSON.parse(content);
+    return {
+      ...parsed,
+      source: "AI Analysis"
+    };
   } catch (error) {
     console.error("Error generating burnout analysis from LLM:", error);
-    return fallbackBurnoutAnalysis(profile, financeData, burnoutInfo);
+    const fallbackVal = fallbackBurnoutAnalysis(profile, financeData, burnoutInfo);
+    return {
+      ...fallbackVal,
+      source: "Quick Analysis"
+    };
   }
 };
 
