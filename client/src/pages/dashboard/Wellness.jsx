@@ -11,6 +11,8 @@ import {
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
+import { motion } from "framer-motion";
+import BreathingSpacer from "@/components/dashboard/BreathingSpacer";
 
 const chartStyle = {
   background: "#010d1e",
@@ -33,6 +35,9 @@ export default function Wellness() {
   // Weekly Report state
   const [weeklyReport, setWeeklyReport] = useState(null);
   const [loadingWeeklyReport, setLoadingWeeklyReport] = useState(false);
+
+  // Breathing Modal state
+  const [isBreathingOpen, setIsBreathingOpen] = useState(false);
 
   const getTodayReportFallback = (checkins) => {
     const todayStr = new Date().toDateString();
@@ -173,6 +178,16 @@ export default function Wellness() {
     }
   };
 
+  const handleCloseBreathing = async () => {
+    setIsBreathingOpen(false);
+    try {
+      await api.resolveBurnout();
+      await fetchProfile();
+    } catch (err) {
+      console.error("Failed to resolve burnout phase:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -305,6 +320,41 @@ export default function Wellness() {
           </span>
         </div>
       </div>
+
+      {/* Burnout Alert Banner */}
+      {todayReport?.burnoutPhase && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.01 }}
+          onClick={() => setIsBreathingOpen(true)}
+          className="bg-gradient-to-r from-[#ff4433]/20 via-[#ff4433]/15 to-[#ff4433]/5 border border-[#ff4433]/60 hover:border-[#ff4433] p-4 rounded-xl flex items-center justify-between gap-4 cursor-pointer transition-all shadow-[0_0_20px_rgba(255,68,51,0.15)] relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-[#ff4433]/5 animate-pulse pointer-events-none" />
+          
+          <div className="flex items-center gap-3.5 relative z-10">
+            <span className="flex h-3.5 w-3.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4433] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#ff4433]"></span>
+            </span>
+            <div>
+              <h4 className="text-sm font-bold text-[#ff4433] font-display flex items-center gap-1.5">
+                {todayReport?.isRecurrent ? "⚠️ Recurrent Burnout Alarm" : "🚨 Chronic Burnout Warning Active"}
+              </h4>
+              <p className="text-xs text-fog font-thin mt-1">
+                {todayReport?.isRecurrent 
+                  ? "This is a repeating burnout phase. Please take a longer break and focus on self-care."
+                  : `You've recorded high stress (≥ 4/5) for ${todayReport?.consecutiveStressDays || 3} consecutive check-ins. Let's reset.`
+                }
+              </p>
+            </div>
+          </div>
+          
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#ff4433] text-white hover:bg-[#ff4433]/90 transition-colors shrink-0 relative z-10 shadow-md">
+            Relax Now
+          </button>
+        </motion.div>
+      )}
 
       {/* SECTION 1: Baseline Profile */}
       <div className="space-y-4 opacity-90 p-5 rounded-2xl bg-[#010d1e]/20 border border-[#11263b]/20">
@@ -670,6 +720,9 @@ export default function Wellness() {
           </div>
         )}
       </div>
+
+      {/* Breathing Spacer Modal */}
+      <BreathingSpacer isOpen={isBreathingOpen} onClose={handleCloseBreathing} />
     </div>
   );
 }
