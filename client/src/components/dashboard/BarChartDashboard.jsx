@@ -13,7 +13,7 @@ export default function BarChartDashboard({ budgetList }) {
   return (
     <div className="neo-card">
       <p className="eyebrow text-xs mb-4">Activity</p>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={380}>
         <BarChart data={budgetList} margin={{ top: 7 }}>
           <XAxis dataKey="name" tick={{ fill: "#ccced0", fontSize: 11, fontWeight: 100 }} axisLine={{ stroke: "#11263b" }} tickLine={false} />
           <YAxis tick={{ fill: "#999ca1", fontSize: 11, fontWeight: 100 }} axisLine={{ stroke: "#11263b" }} tickLine={false} />
