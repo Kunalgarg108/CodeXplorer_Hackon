@@ -14,20 +14,20 @@ const CHEAPER_ALTERNATIVES = {
 };
 
 export function InsightCards() {
-  const { format } = useCurrency();
+  const { currency, format } = useCurrency();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchInsights();
-  }, []);
+  }, [currency]);
 
   const fetchInsights = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.getAIInsights();
+      const res = await api.getAIInsights(currency);
       setData(res);
     } catch (err) {
       setError(err.message || "Failed to load financial advice & insights.");

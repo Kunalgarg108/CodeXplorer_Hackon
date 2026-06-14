@@ -1,8 +1,8 @@
 import { chatCompletion, isAIConfigured } from "./aiClient.js";
 
-const generateAlertsWithAI = async (budgetSummaries) => {
+const generateAlertsWithAI = async (budgetSummaries, symbol = "$") => {
   if (!isAIConfigured() || budgetSummaries.length === 0) {
-    return generateFallbackAlerts(budgetSummaries);
+    return generateFallbackAlerts(budgetSummaries, symbol);
   }
 
   try {
@@ -13,8 +13,8 @@ ${JSON.stringify(budgetSummaries, null, 2)}
 
 Generate 1-4 personalized alert messages as a JSON array. Each alert:
 - "priority": "high", "medium", or "low"
-- "message": concise alert (1 sentence, use $ for currency)
-- "action": actionable suggestion (1 sentence)
+- "message": concise alert (1 sentence, use ${symbol} for currency)
+- "action": actionable suggestion (1 sentence, use ${symbol} for currency)
 - "budgetName": which budget
 - "type": "overspend", "approaching_limit", "burn_rate", "weekly_spike", or "savings_tip"
 
@@ -26,7 +26,7 @@ Return ONLY a JSON array. No markdown.`;
       { maxTokens: 800 }
     );
 
-    if (!content) return generateFallbackAlerts(budgetSummaries);
+    if (!content) return generateFallbackAlerts(budgetSummaries, symbol);
 
     let parsed;
     const trimmed = content.trim();
@@ -35,17 +35,17 @@ Return ONLY a JSON array. No markdown.`;
     } catch {
       const match = trimmed.match(/\[[\s\S]*\]/);
       if (match) parsed = JSON.parse(match[0]);
-      else return generateFallbackAlerts(budgetSummaries);
+      else return generateFallbackAlerts(budgetSummaries, symbol);
     }
 
-    return Array.isArray(parsed) ? parsed.slice(0, 5) : generateFallbackAlerts(budgetSummaries);
+    return Array.isArray(parsed) ? parsed.slice(0, 5) : generateFallbackAlerts(budgetSummaries, symbol);
   } catch (error) {
     console.error("Error generating budget alerts from AI:", error.message);
-    return generateFallbackAlerts(budgetSummaries);
+    return generateFallbackAlerts(budgetSummaries, symbol);
   }
 };
 
-const generateFallbackAlerts = (budgetSummaries) => {
+const generateFallbackAlerts = (budgetSummaries, symbol = "$") => {
   const alerts = [];
 
   for (const budget of budgetSummaries) {
@@ -54,7 +54,7 @@ const generateFallbackAlerts = (budgetSummaries) => {
     if (utilizationPercent >= 90) {
       alerts.push({
         priority: "high",
-        message: `You have spent $${totalSpend} of your $${amount} ${name} budget (${utilizationPercent}% used).`,
+        message: `You have spent ${symbol}${totalSpend} of your ${symbol}${amount} ${name} budget (${utilizationPercent}% used).`,
         action: `Freeze non-essential ${name.toLowerCase()} spending to avoid exceeding your limit.`,
         budgetName: name,
         type: "overspend",
@@ -62,7 +62,7 @@ const generateFallbackAlerts = (budgetSummaries) => {
     } else if (utilizationPercent >= 70) {
       alerts.push({
         priority: "medium",
-        message: `Your ${name} budget is ${utilizationPercent}% utilized — $${(amount - totalSpend).toFixed(0)} remaining.`,
+        message: `Your ${name} budget is ${utilizationPercent}% utilized — ${symbol}${(amount - totalSpend).toFixed(0)} remaining.`,
         action: `Plan remaining ${name.toLowerCase()} expenses carefully.`,
         budgetName: name,
         type: "approaching_limit",
@@ -73,7 +73,7 @@ const generateFallbackAlerts = (budgetSummaries) => {
       alerts.push({
         priority: "medium",
         message: `You may exceed your ${name} budget in ${Math.round(daysUntilExhaustion)} days.`,
-        action: `Reduce daily spending from $${burnRate.toFixed(0)} to stay on track.`,
+        action: `Reduce daily spending from ${symbol}${burnRate.toFixed(0)} to stay on track.`,
         budgetName: name,
         type: "burn_rate",
       });
@@ -95,7 +95,7 @@ const generateFallbackAlerts = (budgetSummaries) => {
     if (top.utilizationPercent > 50) {
       alerts.push({
         priority: "low",
-        message: `Save ~$${Math.round(top.totalSpend * 0.15)} by reducing ${top.name.toLowerCase()} expenses 15%.`,
+        message: `Save ~${symbol}${Math.round(top.totalSpend * 0.15)} by reducing ${top.name.toLowerCase()} expenses 15%.`,
         action: `Try cheaper alternatives for your top ${top.name.toLowerCase()} expenses.`,
         budgetName: top.name,
         type: "savings_tip",

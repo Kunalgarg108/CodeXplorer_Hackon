@@ -5,6 +5,7 @@ import Expense from "../models/Expense.js";
 import { auth } from "../middleware/auth.js";
 import getBurnoutAnalysis from "../utils/getBurnoutAnalysis.js";
 import { getWeeklyAnalysis } from "../utils/getWeeklyAnalysis.js";
+import { getExchangeRates, getCurrencySymbol } from "../services/currencyService.js";
 
 const router = express.Router();
 
@@ -216,6 +217,11 @@ router.post("/resolve-burnout", auth, async (req, res) => {
 // GET /api/wellness/analyze - perform burnout risk analysis
 router.get("/analyze", auth, async (req, res) => {
   try {
+    const currencyCode = req.query.currency || "USD";
+    const { rates } = getExchangeRates();
+    const rate = rates[currencyCode] || 1;
+    const symbol = getCurrencySymbol(currencyCode);
+
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -292,11 +298,11 @@ router.get("/analyze", auth, async (req, res) => {
     });
 
     const financeData = {
-      totalFoodBudgetLimit,
-      totalFoodBudgetSpend,
-      copingSpend,
-      examWindowSpend,
-      totalSpend
+      totalFoodBudgetLimit: totalFoodBudgetLimit * rate,
+      totalFoodBudgetSpend: totalFoodBudgetSpend * rate,
+      copingSpend: copingSpend * rate,
+      examWindowSpend: examWindowSpend * rate,
+      totalSpend: totalSpend * rate
     };
 
     // Calculate trailing consecutive days where stressLevel >= 4
@@ -330,7 +336,7 @@ router.get("/analyze", auth, async (req, res) => {
       financeData,
       wellnessState
     };
-    const currentContextStr = JSON.stringify(context);
+    const currentContextStr = `${currencyCode}_${JSON.stringify(context)}`;
     const userId = req.user.id;
     const cached = burnoutCache.get(userId);
 
@@ -338,7 +344,7 @@ router.get("/analyze", auth, async (req, res) => {
     if (cached && cached.contextStr === currentContextStr) {
       analysis = cached.analysis;
     } else {
-      analysis = await getBurnoutAnalysis(profile, financeData, wellnessState);
+      analysis = await getBurnoutAnalysis(profile, financeData, wellnessState, symbol);
       burnoutCache.set(userId, { contextStr: currentContextStr, analysis });
     }
     

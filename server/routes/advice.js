@@ -3,6 +3,7 @@ import getFinancialAdvice, { getAIInsights } from "../utils/getFinancialAdvice.j
 import { auth } from "../middleware/auth.js";
 import Transaction from "../models/Transaction.js";
 import SpendingThreshold from "../models/SpendingThreshold.js";
+import { getExchangeRates, getCurrencySymbol } from "../services/currencyService.js";
 
 const router = express.Router();
 const adviceCache = new Map(); // userId -> { cacheKey, advice }
@@ -10,8 +11,18 @@ const insightsCache = new Map(); // userId -> { contextStr, insights }
 
 router.post("/", auth, async (req, res) => {
   try {
-    const { totalBudget, totalIncome, totalSpend } = req.body;
-    const cacheKey = `${totalBudget}_${totalIncome}_${totalSpend}`;
+    const { totalBudget, totalIncome, totalSpend, currency } = req.body;
+    const currencyCode = currency || "USD";
+    const { rates } = getExchangeRates();
+    const rate = rates[currencyCode] || 1;
+    const symbol = getCurrencySymbol(currencyCode);
+
+    // Convert values to selected currency for prompt/cache
+    const convertedBudget = Math.round(totalBudget * rate * 100) / 100;
+    const convertedIncome = Math.round(totalIncome * rate * 100) / 100;
+    const convertedSpend = Math.round(totalSpend * rate * 100) / 100;
+
+    const cacheKey = `${currencyCode}_${convertedBudget}_${convertedIncome}_${convertedSpend}`;
     const userId = req.user.id;
 
     const cached = adviceCache.get(userId);
@@ -19,7 +30,7 @@ router.post("/", auth, async (req, res) => {
       return res.json({ advice: cached.advice });
     }
 
-    const advice = await getFinancialAdvice(totalBudget, totalIncome, totalSpend);
+    const advice = await getFinancialAdvice(convertedBudget, convertedIncome, convertedSpend, symbol);
     adviceCache.set(userId, { cacheKey, advice });
     res.json({ advice });
   } catch (error) {
@@ -29,6 +40,11 @@ router.post("/", auth, async (req, res) => {
 
 router.get("/insights", auth, async (req, res) => {
   try {
+    const currencyCode = req.query.currency || "USD";
+    const { rates } = getExchangeRates();
+    const rate = rates[currencyCode] || 1;
+    const symbol = getCurrencySymbol(currencyCode);
+
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
@@ -132,16 +148,43 @@ router.get("/insights", auth, async (req, res) => {
       }
     }
 
+    // Convert values to target currency
+    const totalSpendConverted = Math.round(totalSpend * rate * 100) / 100;
+
+    const categoryBreakdownConverted = {};
+    for (const [cat, val] of Object.entries(categoryBreakdown)) {
+      categoryBreakdownConverted[cat] = Math.round(val * rate * 100) / 100;
+    }
+
+    const topMerchantsConverted = topMerchants.map(m => ({
+      name: m.name,
+      amount: Math.round(m.amount * rate * 100) / 100
+    }));
+
+    const breachesConverted = breaches.map(b => ({
+      category: b.category,
+      thresholdAmount: Math.round(b.thresholdAmount * rate * 100) / 100,
+      currentSpent: Math.round(b.currentSpent * rate * 100) / 100,
+      excess: Math.round(b.excess * rate * 100) / 100
+    }));
+
+    const subscriptionsConverted = subscriptions.map(s => ({
+      merchantName: s.merchantName,
+      amount: Math.round(s.amount * rate * 100) / 100,
+      frequency: s.frequency,
+      lastTransactionDate: s.lastTransactionDate
+    }));
+
     // 4. Generate AI Insights or Fallback
     const context = {
-      totalSpend,
-      categoryBreakdown,
-      topMerchants,
-      breaches,
-      subscriptions
+      totalSpend: totalSpendConverted,
+      categoryBreakdown: categoryBreakdownConverted,
+      topMerchants: topMerchantsConverted,
+      breaches: breachesConverted,
+      subscriptions: subscriptionsConverted
     };
 
-    const contextStr = JSON.stringify(context);
+    const contextStr = `${currencyCode}_${JSON.stringify(context)}`;
     const userId = req.user.id;
     const cached = insightsCache.get(userId);
 
@@ -149,16 +192,16 @@ router.get("/insights", auth, async (req, res) => {
     if (cached && cached.contextStr === contextStr) {
       insights = cached.insights;
     } else {
-      insights = await getAIInsights(context);
+      insights = await getAIInsights(context, symbol);
 
       // Fallback if AI fails or key is missing
       if (!insights || !Array.isArray(insights)) {
         insights = [];
         
         // Heuristic Rule 1: Threshold breaches
-        if (breaches.length > 0) {
-          const primaryBreach = breaches[0];
-          insights.push(`Your spending in the '${primaryBreach.category}' category has exceeded its monthly limit of ₹${primaryBreach.thresholdAmount} by ₹${primaryBreach.excess.toFixed(2)}. Consider reviewing individual transactions here.`);
+        if (breachesConverted.length > 0) {
+          const primaryBreach = breachesConverted[0];
+          insights.push(`Your spending in the '${primaryBreach.category}' category has exceeded its monthly limit of ${symbol}${primaryBreach.thresholdAmount} by ${symbol}${primaryBreach.excess.toFixed(2)}. Consider reviewing individual transactions here.`);
         }
 
         // Heuristic Rule 2: Cheaper alternatives or top spending
@@ -173,11 +216,11 @@ router.get("/insights", auth, async (req, res) => {
         };
 
         let alternativeSuggestionAdded = false;
-        for (const merchant of topMerchants) {
+        for (const merchant of topMerchantsConverted) {
           const lowerName = merchant.name.toLowerCase();
           for (const [key, val] of Object.entries(CHEAPER_ALTERNATIVES)) {
             if (lowerName.includes(key)) {
-              insights.push(`You spent ₹${merchant.amount.toFixed(2)} at ${merchant.name} this month. Swapping this for ${val.alternative} could save you up to ${val.savingPercent}% on your budget.`);
+              insights.push(`You spent ${symbol}${merchant.amount.toFixed(2)} at ${merchant.name} this month. Swapping this for ${val.alternative} could save you up to ${val.savingPercent}% on your budget.`);
               alternativeSuggestionAdded = true;
               break;
             }
@@ -185,15 +228,15 @@ router.get("/insights", auth, async (req, res) => {
           if (alternativeSuggestionAdded) break;
         }
 
-        if (!alternativeSuggestionAdded && topMerchants.length > 0) {
-          const topM = topMerchants[0];
-          insights.push(`Your highest spending merchant this month is ${topM.name} with a total of ₹${topM.amount.toFixed(2)}. Setting a cooling-off limit before purchasing can prevent impulse spending.`);
+        if (!alternativeSuggestionAdded && topMerchantsConverted.length > 0) {
+          const topM = topMerchantsConverted[0];
+          insights.push(`Your highest spending merchant this month is ${topM.name} with a total of ${symbol}${topM.amount.toFixed(2)}. Setting a cooling-off limit before purchasing can prevent impulse spending.`);
         }
 
         // Heuristic Rule 3: Subscriptions
-        if (subscriptions.length > 0) {
-          const sub = subscriptions[0];
-          insights.push(`We identified a recurring monthly charge of ₹${sub.amount.toFixed(2)} at ${sub.merchantName}. Make sure you are actively using this subscription or cancel to save money.`);
+        if (subscriptionsConverted.length > 0) {
+          const sub = subscriptionsConverted[0];
+          insights.push(`We identified a recurring monthly charge of ${symbol}${sub.amount.toFixed(2)} at ${sub.merchantName}. Make sure you are actively using this subscription or cancel to save money.`);
         }
 
         // Fill in remaining bullets to ensure exactly 3 elements
@@ -211,11 +254,11 @@ router.get("/insights", auth, async (req, res) => {
 
     res.json({
       insights,
-      subscriptions,
-      topMerchants,
-      categoryBreakdown,
-      breaches,
-      totalSpend
+      subscriptions: subscriptionsConverted,
+      topMerchants: topMerchantsConverted,
+      categoryBreakdown: categoryBreakdownConverted,
+      breaches: breachesConverted,
+      totalSpend: totalSpendConverted
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

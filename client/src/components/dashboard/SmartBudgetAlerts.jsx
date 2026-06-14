@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { useCurrency } from "@/context/CurrencyContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertTriangle,
@@ -43,6 +44,7 @@ const typeIcons = {
 };
 
 export default function SmartBudgetAlerts() {
+  const { currency } = useCurrency();
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,7 +54,7 @@ export default function SmartBudgetAlerts() {
     else setLoading(true);
 
     try {
-      const data = await api.getBudgetAlerts();
+      const data = await api.getBudgetAlerts(currency);
       setAlerts(data.alerts || []);
     } catch (err) {
       console.error("Failed to fetch budget alerts:", err);
@@ -64,7 +66,7 @@ export default function SmartBudgetAlerts() {
 
   useEffect(() => {
     fetchAlerts();
-  }, []);
+  }, [currency]);
 
   if (loading) {
     return (

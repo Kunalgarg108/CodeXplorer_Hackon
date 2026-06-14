@@ -129,7 +129,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  getBudgetAlerts: () => request("/budget-alerts"),
+  getBudgetAlerts: (currency) => request(`/budget-alerts${currency ? `?currency=${currency}` : ""}`),
   sendChatMessage: (body) => request("/chat", { method: "POST", body: JSON.stringify(body) }),
   getFoodRecommendations: () => request("/food-recommendations"),
 
@@ -143,7 +143,7 @@ export const api = {
 
   getWellnessProfile: () => request("/wellness"),
   updateWellnessProfile: (body) => request("/wellness", { method: "PUT", body: JSON.stringify(body) }),
-  analyzeBurnout: () => request("/wellness/analyze"),
+  analyzeBurnout: (currency) => request(`/wellness/analyze${currency ? `?currency=${currency}` : ""}`),
   analyzeWeeklyReport: () => request("/wellness/weekly"),
   submitDailyCheckin: (body) => request("/wellness/checkin", { method: "POST", body: JSON.stringify(body) }),
   resolveBurnout: () => request("/wellness/resolve-burnout", { method: "POST" }),
@@ -157,7 +157,7 @@ export const api = {
   markAlertRead: (id) => request(`/alerts/${id}/read`, { method: "PATCH" }),
   deleteAlert: (id) => request(`/alerts/${id}`, { method: "DELETE" }),
 
-  getAIInsights: () => request("/advice/insights"),
+  getAIInsights: (currency) => request(`/advice/insights${currency ? `?currency=${currency}` : ""}`),
 
   exportTransactionsCSV: async (params = "") => {
     const token = getToken();

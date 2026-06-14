@@ -11,7 +11,7 @@ import RecoveryStatusCard from "@/components/dashboard/RecoveryStatusCard";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { format } = useCurrency();
+  const { currency, format } = useCurrency();
   const [budgetList, setBudgetList] = useState([]);
   const [incomeList, setIncomeList] = useState([]);
   const [expensesList, setExpensesList] = useState([]);
@@ -56,7 +56,7 @@ export default function Dashboard() {
       setHasCheckedInToday(checkedIn);
 
       // Perform burnout analysis
-      const bData = await api.analyzeBurnout();
+      const bData = await api.analyzeBurnout(currency);
       setBurnoutAnalysis(bData);
     } catch (err) {
       console.error("Failed to load wellness or analyze burnout:", err);
@@ -98,7 +98,7 @@ export default function Dashboard() {
   // Fetch advice and condense it
   useEffect(() => {
     if (totalBudget > 0 || totalIncome > 0 || totalSpend > 0) {
-      api.getAdvice({ totalBudget, totalIncome, totalSpend })
+      api.getAdvice({ totalBudget, totalIncome, totalSpend, currency })
         .then((data) => {
           const advice = data.advice || "";
           // Split by punctuation followed by space
@@ -108,7 +108,7 @@ export default function Dashboard() {
         })
         .catch(() => setFinancialAdvice("Focus on maintaining your budget limits and tracking daily transactions."));
     }
-  }, [totalBudget, totalIncome, totalSpend]);
+  }, [totalBudget, totalIncome, totalSpend, currency]);
 
   useEffect(() => {
     if (user) {
