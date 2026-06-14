@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 const SUGGESTIONS = [
-  "I only have ₹500 left for the week.",
+  "I only have $500 left for the week.",
   "What affordable food options do I have?",
   "How can I save more this month?",
   "Am I overspending on any category?",
