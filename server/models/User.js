@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
     course: { type: String, default: "" },
     semester: { type: Number, default: null },
     wellnessProfile: {
+      degree: { type: String, default: "" },
       semester: { type: Number, default: null },
       examDate: { type: Date, default: null },
       sleepHours: { type: Number, default: 6 },

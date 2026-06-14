@@ -39,12 +39,12 @@ export default function DashboardLayout() {
       <div className="fixed md:w-[270px] hidden md:block z-40 h-screen">
         <div className="h-full p-6 bg-deep border-r border-steel/30 shadow-neo flex flex-col justify-between">
           <div className="flex flex-col flex-1 min-h-0">
-            <div className="flex items-center gap-3 mb-8 shrink-0">
+            <Link to="/" className="flex items-center gap-3 mb-8 shrink-0 hover:opacity-90 transition-opacity">
               <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
                 <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
               </div>
               <span className="font-display font-medium text-paper">PocketBuddy</span>
-            </div>
+            </Link>
             <nav className="mt-2 overflow-y-auto flex-1 sidebar-scroll pr-1">
               {menuList.map((menu, index) => (
                 <Link to={menu.path} key={index}>
@@ -79,7 +79,12 @@ export default function DashboardLayout() {
       </div>
       <div className="md:ml-[270px] min-h-screen">
         <div className="p-4 border-b border-steel/30 flex justify-between items-center md:hidden bg-deep">
-          <span className="font-display text-paper text-sm">PocketBuddy</span>
+          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <div className="w-6 h-6 rounded bg-paper flex items-center justify-center">
+              <img src="/chart-donut.svg" alt="logo" width={14} height={14} />
+            </div>
+            <span className="font-display text-paper text-sm font-semibold">PocketBuddy</span>
+          </Link>
           <Button variant="outline" size="sm" onClick={logout}>Logout</Button>
         </div>
         <Outlet />
