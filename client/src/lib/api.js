@@ -59,6 +59,7 @@ export const api = {
   getIncomes: () => request("/incomes"),
   createIncome: (body) =>
     request("/incomes", { method: "POST", body: JSON.stringify(body) }),
+  deleteIncome: (id) => request(`/incomes/${id}`, { method: "DELETE" }),
 
   getExpenses: () => request("/expenses"),
   getExpensesByBudget: (budgetId) => request(`/expenses/budget/${budgetId}`),

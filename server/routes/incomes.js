@@ -44,4 +44,15 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const income = await Income.findOne({ _id: req.params.id, createdBy: req.user.email });
+    if (!income) return res.status(404).json({ message: "Income not found" });
+    await Income.deleteOne({ _id: income._id });
+    res.json({ message: "Income deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
