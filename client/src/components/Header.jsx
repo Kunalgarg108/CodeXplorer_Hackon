@@ -37,7 +37,7 @@ export default function Header() {
             <img src="/chart-donut.svg" alt="logo" width={20} height={20} />
           </div>
           <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 16, color: "#fff" }}>
-            FinanSmart
+            PocketBuddy
           </span>
         </Link>
 

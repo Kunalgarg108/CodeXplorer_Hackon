@@ -43,7 +43,7 @@ export default function DashboardLayout() {
               <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
                 <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
               </div>
-              <span className="font-display font-medium text-paper">FinanSmart</span>
+              <span className="font-display font-medium text-paper">PocketBuddy</span>
             </div>
             <nav className="mt-2 overflow-y-auto flex-1 sidebar-scroll pr-1">
               {menuList.map((menu, index) => (
@@ -79,7 +79,7 @@ export default function DashboardLayout() {
       </div>
       <div className="md:ml-[270px] min-h-screen">
         <div className="p-4 border-b border-steel/30 flex justify-between items-center md:hidden bg-deep">
-          <span className="font-display text-paper text-sm">FinanSmart</span>
+          <span className="font-display text-paper text-sm">PocketBuddy</span>
           <Button variant="outline" size="sm" onClick={logout}>Logout</Button>
         </div>
         <Outlet />

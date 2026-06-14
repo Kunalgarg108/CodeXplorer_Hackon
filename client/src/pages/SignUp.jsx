@@ -78,7 +78,7 @@ export default function SignUp() {
       <form onSubmit={handleSubmit} className="w-full max-w-md neo-card p-8 z-10 relative pointer-events-auto">
         <p className="eyebrow text-xs mb-3">Get started</p>
         <h1 className="font-display font-semibold text-2xl text-paper mb-2">Sign Up</h1>
-        <p className="text-fog font-thin text-sm mb-8">Create your FinanSmart account</p>
+        <p className="text-fog font-thin text-sm mb-8">Create your PocketBuddy account</p>
         <div className="space-y-5">
           <div>
             <label className="text-fog text-sm font-thin block mb-1">Full Name</label>
