@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, CircleDollarSign,
+  LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, CircleDollarSign, LineChart,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 const menuList = [
   { name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
+  { name: "Transactions", icon: LineChart, path: "/dashboard/transactions" },
   { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes" },
   { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets" },
   { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses" },

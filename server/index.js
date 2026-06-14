@@ -6,7 +6,11 @@ import authRoutes from "./routes/auth.js";
 import budgetRoutes from "./routes/budgets.js";
 import incomeRoutes from "./routes/incomes.js";
 import expenseRoutes from "./routes/expenses.js";
+import transactionRoutes from "./routes/transactions.js";
+import bankStatementRoutes from "./routes/bankStatements.js";
+import uploadRoutes from "./routes/uploads.js";
 import adviceRoutes from "./routes/advice.js";
+import merchantRoutes from "./routes/merchants.js";
 
 dotenv.config();
 
@@ -21,7 +25,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/incomes", incomeRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/bank-statements", bankStatementRoutes);
+app.use("/api/uploads", uploadRoutes);
 app.use("/api/advice", adviceRoutes);
+app.use("/api/merchants", merchantRoutes);
 
 const start = async () => {
   try {
