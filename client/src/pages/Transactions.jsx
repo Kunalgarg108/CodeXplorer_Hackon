@@ -7,6 +7,7 @@ import AlertsAndThresholds from "@/components/dashboard/AlertsAndThresholds";
 import InsightCards from "@/components/dashboard/InsightCards";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { Plus, Download, FileText, LayoutDashboard, AlertTriangle, Sparkles } from "lucide-react";
 
 const CATEGORIES = [
   "Food & Dining",
@@ -109,19 +110,19 @@ export default function TransactionsPage() {
                   onClick={() => setIsAddModalOpen(true)}
                   className="px-4 py-2 bg-[#1c6cff] hover:bg-[#1c6cff]/90 text-white font-semibold rounded-xl text-sm transition duration-150 shadow-neo flex items-center gap-1.5"
                 >
-                  ➕ Add Transaction
+                  <Plus className="w-4 h-4" /> Add Transaction
                 </button>
                 <button
                   onClick={handleExportCSV}
                   className="px-4 py-2 bg-[#010d1e] hover:bg-[#001533] text-paper font-semibold border border-steel/40 rounded-xl text-sm transition duration-150 shadow-sm flex items-center gap-1.5"
                 >
-                  📥 Export CSV
+                  <Download className="w-4 h-4" /> Export CSV
                 </button>
                 <button
                   onClick={handlePrintPDF}
                   className="px-4 py-2 bg-gradient-to-r from-[#1c6cff]/20 to-[#1c6cff]/5 hover:from-[#1c6cff]/30 hover:to-[#1c6cff]/15 text-[#1c6cff] font-semibold border border-[#1c6cff]/30 rounded-xl text-sm transition duration-150 shadow-sm flex items-center gap-1.5"
                 >
-                  📄 Print PDF Report
+                  <FileText className="w-4 h-4" /> Print PDF Report
                 </button>
               </>
             )}
@@ -140,7 +141,7 @@ export default function TransactionsPage() {
               : "border-transparent text-mist hover:text-white"
           }`}
         >
-          <span>📊</span> Dashboard & Analysis
+          <LayoutDashboard className="w-4 h-4" /> Dashboard & Analysis
         </button>
         <button
           onClick={() => setActiveTab("alerts")}
@@ -150,7 +151,7 @@ export default function TransactionsPage() {
               : "border-transparent text-mist hover:text-white"
           }`}
         >
-          <span>🚨</span> Alerts & Budgets
+          <AlertTriangle className="w-4 h-4" /> Alerts & Budgets
         </button>
         <button
           onClick={() => setActiveTab("insights")}
@@ -160,7 +161,7 @@ export default function TransactionsPage() {
               : "border-transparent text-mist hover:text-white"
           }`}
         >
-          <span>✨</span> AI Insights & Recommendations
+          <Sparkles className="w-4 h-4" /> AI Insights & Recommendations
         </button>
       </div>
 
