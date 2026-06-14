@@ -731,7 +731,7 @@ export default function Wellness() {
                   
                   <Tooltip contentStyle={chartStyle} />
                   <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-                  <Area yAxisId="sleep-axis" type="monotone" dataKey="Sleep" stroke="#1c6cff" fillOpacity={1} fill="url(#sleepGrad)" strokeWidth={2} name="Sleep Hours" />
+                  <Area yAxisId="sleep-axis" type="monotone" dataKey="Sleep" stroke="#1c6cff" fillOpacity={1} fill="url(#sleepGrad)" strokeWidth={2} dot={{ r: 4, stroke: "#1c6cff", strokeWidth: 2, fill: "#010d1e" }} activeDot={{ r: 6 }} name="Sleep Hours" />
                   <Line yAxisId="stress-axis" type="monotone" dataKey="Stress" stroke="#ff4433" strokeWidth={2.5} dot={{ r: 4, stroke: "#ff4433", strokeWidth: 2, fill: "#010d1e" }} activeDot={{ r: 6 }} name="Stress Level" />
                 </ComposedChart>
               </ResponsiveContainer>
