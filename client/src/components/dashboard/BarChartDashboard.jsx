@@ -13,9 +13,9 @@ const renderLegendText = (value) => {
   return <span className="text-fog font-medium ml-1.5">{value}</span>;
 };
 
-export default function BarChartDashboard({ budgetList, height = 220 }) {
+export default function BarChartDashboard({ budgetList, height = 220, className = "neo-card" }) {
   return (
-    <div className="neo-card">
+    <div className={className}>
       <p className="text-sm md:text-base font-semibold text-paper mb-4">Activity</p>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={budgetList} margin={{ top: 7 }}>

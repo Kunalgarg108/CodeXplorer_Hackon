@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
       hasJob: { type: Boolean, default: false },
       surveyCompleted: { type: Boolean, default: false },
       lastResolvedBurnout: { type: Date, default: null },
+      burnoutState: { type: String, enum: ["normal", "warning", "chronic", "recovering"], default: "normal" },
+      triggerDate: { type: Date, default: null },
+      recoveryDaysRequired: { type: Number, default: 3 },
+      recoveryDaysCompleted: { type: Number, default: 0 },
       dailyCheckins: [
         {
           date: { type: Date, default: Date.now },
