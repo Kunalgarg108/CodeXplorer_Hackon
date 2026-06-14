@@ -102,7 +102,9 @@ router.post("/", auth, async (req, res) => {
       return res.status(400).json({ message: "Message is required" });
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const isPlaceholderKey = (key) => !key || key.trim() === "" || key.startsWith("your-") || key.includes("placeholder");
+    const rawKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = isPlaceholderKey(rawKey) ? null : rawKey;
     if (!apiKey) {
       return res.json({
         reply: "AI assistant is not configured. Please add OPENROUTER_API_KEY or OPENAI_API_KEY to server .env file.",

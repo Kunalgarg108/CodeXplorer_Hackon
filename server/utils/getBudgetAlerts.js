@@ -1,7 +1,9 @@
 import OpenAI from "openai";
 
+const isPlaceholderKey = (key) => !key || key.trim() === "" || key.startsWith("your-") || key.includes("placeholder");
+
 const generateAlertsWithAI = async (budgetSummaries) => {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = isPlaceholderKey(process.env.OPENROUTER_API_KEY) ? null : process.env.OPENROUTER_API_KEY;
 
   if (!apiKey || budgetSummaries.length === 0) {
     return generateFallbackAlerts(budgetSummaries);
