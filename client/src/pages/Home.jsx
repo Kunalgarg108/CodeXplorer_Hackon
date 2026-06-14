@@ -23,7 +23,7 @@ export default function Home() {
             <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 14, color: "#fff" }}>PocketBuddy</span>
           </div>
           <p style={{ color: "#999ca1", fontSize: 13, fontWeight: 300 }}>
-            © 2025 PocketBuddy. Built with ❤️ for financial clarity.
+            © 2026 PocketBuddy. Built for financial clarity.
           </p>
         </div>
       </footer>

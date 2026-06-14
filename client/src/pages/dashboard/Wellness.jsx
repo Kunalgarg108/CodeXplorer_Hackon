@@ -421,7 +421,13 @@ export default function Wellness() {
             <div>
               <p className="text-[10px] text-mist uppercase tracking-wider leading-none">Current Year</p>
               <p className="font-display font-medium text-sm text-paper mt-1">
-                {profile.semester ? `Semester ${profile.semester}` : "Not set"}
+                {profile.semester
+                  ? (profile.degree
+                      ? (profile.degree === "Ph.D." ? `Ph.D. - Year ${profile.semester}` : `${profile.degree} - Semester ${profile.semester}`)
+                      : `Semester ${profile.semester}`
+                    )
+                  : "Not set"
+                }
               </p>
             </div>
           </div>
