@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import BarChartDashboard from "@/components/dashboard/BarChartDashboard";
-import { Sparkles, HeartPulse, RefreshCw, Moon, Wind, Apple, Shield, Smile, Receipt, TrendingUp, Lightbulb } from "lucide-react";
+import { Sparkles, HeartPulse, RefreshCw, Moon, Wind, Apple, Shield, Smile, Receipt, TrendingUp, Lightbulb, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 import BreathingSpacer from "@/components/dashboard/BreathingSpacer";
 import RecoveryStatusCard from "@/components/dashboard/RecoveryStatusCard";
@@ -182,12 +182,12 @@ export default function Dashboard() {
       )}
 
       {/* Top Row Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
         {/* Left Column: Financial Health */}
         <div className="w-full neo-card p-[1.25rem] bg-deep border border-steel/30 rounded-[var(--border-radius-lg)] flex flex-col justify-between h-full">
           <div>
             <p className="text-[12px] font-semibold text-mist uppercase tracking-[0.05em] mb-2">Financial Health</p>
-            <div className="flex items-baseline gap-1.5 mb-3">
+            <div className="flex items-baseline gap-1.5 mb-5">
               <span className="text-[32px] font-bold text-paper font-display leading-none">
                 ${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </span>
@@ -197,9 +197,9 @@ export default function Dashboard() {
             </div>
             
             {/* Progress bar */}
-            <div className="w-full bg-[#11263b]/50 rounded-full h-[6px] overflow-hidden border border-steel/10">
+            <div className="w-full bg-[#11263b]/50 rounded-full h-[10px] overflow-hidden border border-steel/10">
               <div 
-                className="bg-signal h-[6px] rounded-full transition-all duration-500" 
+                className="bg-signal h-[10px] rounded-full transition-all duration-500" 
                 style={{ 
                   width: `${totalBudget > 0 ? Math.min((totalSpend / totalBudget) * 100, 100) : 0}%`,
                   minWidth: totalSpend > 0 ? "4px" : "0px"
@@ -207,20 +207,30 @@ export default function Dashboard() {
               />
             </div>
             {/* Subtext below bar */}
-            <div className="text-[12px] text-mist mt-2 font-light">
+            <div className="text-[12px] text-mist mt-3 font-light">
               {(totalBudget > 0 ? Math.min((totalSpend / totalBudget) * 100, 100) : 0).toFixed(0)}% of budget used · ${Math.max(0, totalBudget - totalSpend).toLocaleString()} remaining
             </div>
           </div>
 
           {/* Stats tiles */}
           <div className="grid grid-cols-2 gap-3 mt-auto pt-4">
-            <div className="p-3 rounded-[var(--border-radius-md)] bg-midnight/60 border border-steel/30">
-              <span className="text-[11px] text-mist font-semibold uppercase tracking-wider block">Active Budgets</span>
-              <span className="text-[22px] font-bold text-paper block mt-1 leading-none">{budgetList.length}</span>
+            <div className="p-4 rounded-[var(--border-radius-md)] bg-midnight/60 border border-steel/30 flex flex-col justify-between h-[105px]">
+              <div className="flex justify-between items-start w-full">
+                <span className="text-[11px] text-mist font-semibold uppercase tracking-wider block">Active Budgets</span>
+                <div className="p-1.5 rounded-full bg-steel/10 text-fog border border-steel/20 shrink-0 flex items-center justify-center w-7 h-7">
+                  <Wallet className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <span className="text-[26px] font-bold text-paper block leading-none">{budgetList.length}</span>
             </div>
-            <div className="p-3 rounded-[var(--border-radius-md)] bg-midnight/60 border border-steel/30">
-              <span className="text-[11px] text-mist font-semibold uppercase tracking-wider block">Income Streams</span>
-              <span className="text-[22px] font-bold text-signal block mt-1 leading-none">
+            <div className="p-4 rounded-[var(--border-radius-md)] bg-midnight/60 border border-steel/30 flex flex-col justify-between h-[105px]">
+              <div className="flex justify-between items-start w-full">
+                <span className="text-[11px] text-mist font-semibold uppercase tracking-wider block">Income Streams</span>
+                <div className="p-1.5 rounded-full bg-signal/10 text-signal border border-signal/20 shrink-0 flex items-center justify-center w-7 h-7">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                </div>
+              </div>
+              <span className="text-[26px] font-bold text-signal block leading-none">
                 ${totalIncome.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </span>
             </div>
