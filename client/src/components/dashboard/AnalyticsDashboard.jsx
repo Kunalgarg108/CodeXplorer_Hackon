@@ -17,15 +17,15 @@ import {
 import { api } from "@/lib/api";
 
 const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#FFA07A",
-  "#98D8C8",
-  "#F7DC6F",
-  "#BB8FCE",
-  "#85C1E2",
-  "#F8B88B",
+  "#1c6cff", // neon blue
+  "#00cc4b", // neon green
+  "#ff4433", // neon red
+  "#ff8833", // neon orange
+  "#bb8fce", // violet
+  "#f7dc6f", // yellow
+  "#4ecdc4", // turquoise
+  "#f8b88b", // peach
+  "#98d8c8", // light green
 ];
 
 export function AnalyticsDashboard({ filters = "" }) {
@@ -59,7 +59,7 @@ export function AnalyticsDashboard({ filters = "" }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64 neo-card">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );
@@ -67,7 +67,7 @@ export function AnalyticsDashboard({ filters = "" }) {
 
   if (error) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+      <div className="p-4 rounded-xl bg-[#ff4433]/10 border border-[#ff4433]/20 text-[#ff4433]">
         Error loading analytics: {error}
       </div>
     );
@@ -75,7 +75,7 @@ export function AnalyticsDashboard({ filters = "" }) {
 
   if (!summary) {
     return (
-      <div className="text-center text-gray-500 py-8">
+      <div className="text-center text-fog py-12 neo-card">
         No data available for the selected period
       </div>
     );
@@ -85,26 +85,26 @@ export function AnalyticsDashboard({ filters = "" }) {
     {
       label: "Total Spent",
       value: `₹${summary.stats.totalSpent?.toFixed(2) || "0.00"}`,
-      color: "text-red-600",
-      bg: "bg-red-50",
+      color: "text-[#ff4433]",
+      bg: "bg-[#ff4433]/10 border border-[#ff4433]/20",
     },
     {
       label: "Total Received",
       value: `₹${summary.stats.totalReceived?.toFixed(2) || "0.00"}`,
-      color: "text-green-600",
-      bg: "bg-green-50",
+      color: "text-[#00cc4b]",
+      bg: "bg-[#00cc4b]/10 border border-[#00cc4b]/20",
     },
     {
       label: "Net Spend",
       value: `₹${summary.stats.netSpend?.toFixed(2) || "0.00"}`,
-      color: summary.stats.netSpend > 0 ? "text-orange-600" : "text-green-600",
-      bg: summary.stats.netSpend > 0 ? "bg-orange-50" : "bg-green-50",
+      color: summary.stats.netSpend > 0 ? "text-[#ff8833]" : "text-[#00cc4b]",
+      bg: summary.stats.netSpend > 0 ? "bg-[#ff8833]/10 border border-[#ff8833]/20" : "bg-[#00cc4b]/10 border border-[#00cc4b]/20",
     },
     {
       label: "Transactions",
       value: summary.stats.transactionCount || 0,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-[#1c6cff]",
+      bg: "bg-[#1c6cff]/10 border border-[#1c6cff]/20",
     },
   ];
 
@@ -112,16 +112,16 @@ export function AnalyticsDashboard({ filters = "" }) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((card, idx) => (
-          <div key={idx} className={`${card.bg} rounded-lg p-4`}>
-            <p className="text-sm text-gray-600 mb-1">{card.label}</p>
-            <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
+          <div key={idx} className={`${card.bg} rounded-2xl p-5`}>
+            <p className="text-xs font-semibold text-fog mb-1 uppercase tracking-wider">{card.label}</p>
+            <p className={`text-2xl font-black ${card.color}`}>{card.value}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg border p-4">
-          <h3 className="text-lg font-semibold mb-4">Spending by Category</h3>
+        <div className="neo-card">
+          <h3 className="text-lg font-bold text-white mb-6 font-display">Spending by Category</h3>
           {summary.byCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -139,6 +139,8 @@ export function AnalyticsDashboard({ filters = "" }) {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
+                  stroke="#010d1e"
+                  strokeWidth={2}
                 >
                   {summary.byCategory.map((entry, index) => (
                     <Cell
@@ -147,92 +149,110 @@ export function AnalyticsDashboard({ filters = "" }) {
                     />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#010d1e', borderColor: '#11263b', borderRadius: '12px' }}
+                  itemStyle={{ color: '#f8fafc' }}
+                  labelStyle={{ color: '#94a3b8' }}
+                  formatter={(value) => `₹${value.toFixed(2)}`}
+                />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-64 text-gray-500">
+            <div className="flex items-center justify-center h-64 text-fog">
               No category data
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-lg border p-4">
-          <h3 className="text-lg font-semibold mb-4">Top Merchants</h3>
+        <div className="neo-card">
+          <h3 className="text-lg font-bold text-white mb-6 font-display">Top Merchants</h3>
           {summary.topMerchants.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={summary.topMerchants}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid stroke="#11263b" strokeDasharray="3 3" opacity={0.3} />
                 <XAxis
                   dataKey="merchant"
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  stroke="#11263b"
                   angle={-45}
                   textAnchor="end"
                   height={60}
                 />
-                <YAxis />
-                <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
-                <Bar dataKey="amount" fill="#8884d8" />
+                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} stroke="#11263b" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#010d1e', borderColor: '#11263b', borderRadius: '12px' }}
+                  itemStyle={{ color: '#f8fafc' }}
+                  labelStyle={{ color: '#94a3b8' }}
+                  formatter={(value) => `₹${value.toFixed(2)}`}
+                />
+                <Bar dataKey="amount" fill="#1c6cff" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-64 text-gray-500">
+            <div className="flex items-center justify-center h-64 text-fog">
               No merchant data
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border p-4">
-        <h3 className="text-lg font-semibold mb-4">Spending Trend</h3>
+      <div className="neo-card">
+        <h3 className="text-lg font-bold text-white mb-6 font-display">Spending Trend</h3>
         {trends?.trends && trends.trends.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={trends.trends}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis />
-              <Tooltip formatter={(value) => `₹${value.toFixed(2)}`} />
-              <Legend />
+              <CartesianGrid stroke="#11263b" strokeDasharray="3 3" opacity={0.3} />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} stroke="#11263b" />
+              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} stroke="#11263b" />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#010d1e', borderColor: '#11263b', borderRadius: '12px' }}
+                itemStyle={{ color: '#f8fafc' }}
+                labelStyle={{ color: '#94a3b8' }}
+                formatter={(value) => `₹${value.toFixed(2)}`}
+              />
+              <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
               <Line
                 type="monotone"
                 dataKey="spent"
-                stroke="#FF6B6B"
-                strokeWidth={2}
+                stroke="#ff4433"
+                strokeWidth={2.5}
+                dot={{ r: 4, stroke: '#010d1e', strokeWidth: 1 }}
                 name="Spent"
               />
               <Line
                 type="monotone"
                 dataKey="received"
-                stroke="#4ECDC4"
-                strokeWidth={2}
+                stroke="#00cc4b"
+                strokeWidth={2.5}
+                dot={{ r: 4, stroke: '#010d1e', strokeWidth: 1 }}
                 name="Received"
               />
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-64 text-gray-500">
+          <div className="flex items-center justify-center h-64 text-fog">
             No trend data
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-lg border p-4">
-        <h3 className="text-lg font-semibold mb-4">Category Breakdown</h3>
-        <div className="space-y-2">
+      <div className="neo-card">
+        <h3 className="text-lg font-bold text-white mb-6 font-display">Category Breakdown</h3>
+        <div className="divide-y divide-[#11263b]/30">
           {summary.byCategory.map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div key={idx} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+              <div className="flex items-center gap-2.5">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: COLORS[idx % COLORS.length] }}
                 />
-                <span className="text-sm">{item.category}</span>
+                <span className="text-sm font-semibold text-paper">{item.category}</span>
               </div>
               <div className="text-right">
-                <p className="text-sm font-semibold">
+                <p className="text-sm font-black text-white">
                   ₹{item.amount.toFixed(2)}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-fog mt-0.5">
                   {item.count} transactions
                 </p>
               </div>
