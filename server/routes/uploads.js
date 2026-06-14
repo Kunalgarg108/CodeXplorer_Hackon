@@ -3,11 +3,7 @@ import multer from "multer";
 import { auth } from "../middleware/auth.js";
 import BankStatement from "../models/BankStatement.js";
 import Transaction from "../models/Transaction.js";
-import {
-  extractTextFromPDF,
-  extractTransactionLines,
-  validateTransaction,
-} from "../utils/pdfParser.js";
+import { parseExcelOrCSV } from "../utils/excelParser.js";
 import { categorizeMerchant, categorizeTransactionMerchant } from "../utils/merchantCategorizer.js";
 import { findDuplicateTransactions } from "../utils/transactionHelper.js";
 import { checkCategoryThresholds } from "../utils/alertHelper.js";
@@ -19,10 +15,11 @@ const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === "application/pdf") {
+    const fileExtension = file.originalname.split(".").pop().toLowerCase();
+    if (["xlsx", "xls", "csv"].includes(fileExtension)) {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF files are allowed"));
+      cb(new Error("Only Excel (.xlsx, .xls) and CSV (.csv) files are allowed"));
     }
   },
 });
@@ -35,6 +32,7 @@ router.post("/upload", auth, upload.single("statement"), async (req, res) => {
 
     const userId = req.user.id;
     const createdBy = req.user.email;
+    const password = req.body.password || "";
 
     const bankStatement = new BankStatement({
       userId,
@@ -50,11 +48,10 @@ router.post("/upload", auth, upload.single("statement"), async (req, res) => {
     await bankStatement.save();
 
     try {
-      const pdfText = await extractTextFromPDF(req.file.buffer);
-      const transactionLines = extractTransactionLines(pdfText);
+      const parsedData = await parseExcelOrCSV(req.file.buffer, req.file.originalname, password);
 
       const validTransactions = [];
-      for (const txn of transactionLines.filter(validateTransaction)) {
+      for (const txn of parsedData.transactions) {
         const categorization = await categorizeTransactionMerchant(
           userId,
           createdBy,
@@ -81,6 +78,14 @@ router.post("/upload", auth, upload.single("statement"), async (req, res) => {
       bankStatement.duplicateTransactionIds = duplicates.map((d) =>
         d.existingTransaction._id.toString()
       );
+      
+      // Save metadata
+      bankStatement.statementStartDate = parsedData.startDate || null;
+      bankStatement.statementEndDate = parsedData.endDate || null;
+      bankStatement.bank = parsedData.bank || "";
+      bankStatement.accountNumber = parsedData.accountNumber || "";
+      bankStatement.totalDebit = parsedData.totalDebit || 0;
+      bankStatement.totalCredit = parsedData.totalCredit || 0;
 
       const tempTransactions = toCheck.map((txn) => ({
         transactionDate: txn.date,
@@ -99,19 +104,33 @@ router.post("/upload", auth, upload.single("statement"), async (req, res) => {
       await bankStatement.save();
 
       res.status(200).json({
-        message: "PDF parsed successfully",
+        message: "Spreadsheet parsed successfully",
         bankStatementId: bankStatement._id,
         transactionCount: toCheck.length,
         duplicatesFound: duplicates.length,
         requiresReview: duplicates.length > 0,
       });
     } catch (parseError) {
+      if (parseError.message === "PASSWORD_REQUIRED" || parseError.message === "INVALID_PASSWORD") {
+        bankStatement.parsingStatus = "FAILED";
+        bankStatement.parsingError = parseError.message;
+        await bankStatement.save();
+        
+        return res.status(401).json({
+          error: parseError.message,
+          message: parseError.message === "PASSWORD_REQUIRED" 
+            ? "This bank statement is password protected. Please enter the password." 
+            : "Incorrect password. Please try again.",
+          bankStatementId: bankStatement._id,
+        });
+      }
+      
       bankStatement.parsingStatus = "FAILED";
       bankStatement.parsingError = parseError.message;
       await bankStatement.save();
 
       res.status(400).json({
-        error: "Failed to parse PDF",
+        error: "Failed to parse spreadsheet",
         details: parseError.message,
         bankStatementId: bankStatement._id,
       });

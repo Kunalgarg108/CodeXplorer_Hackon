@@ -42,6 +42,7 @@ const bankStatementSchema = new mongoose.Schema(
     reviewed: { type: Boolean, default: false },
     accepted: { type: Boolean, default: false },
     notes: { type: String, default: "" },
+    _tempTransactions: { type: Array, default: [] },
   },
   { timestamps: true }
 );

@@ -79,9 +79,12 @@ export const api = {
   deleteTransaction: (id) =>
     request(`/transactions/${id}`, { method: "DELETE" }),
 
-  uploadBankStatement: (file) => {
+  uploadBankStatement: (file, password = "") => {
     const formData = new FormData();
     formData.append("statement", file);
+    if (password) {
+      formData.append("password", password);
+    }
     return formRequest("/uploads/upload", formData);
   },
   getUploadPreview: (bankStatementId) =>
