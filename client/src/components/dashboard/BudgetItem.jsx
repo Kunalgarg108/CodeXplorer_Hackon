@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function BudgetItem({ budget }) {
+  const { format } = useCurrency();
   const calculateProgressPerc = () => {
     const perc = (budget.totalSpend / budget.amount) * 100;
     return perc > 100 ? 100 : perc.toFixed(2);
@@ -17,12 +19,12 @@ export default function BudgetItem({ budget }) {
               <p className="text-xs text-mist font-thin">{budget.totalItem} Item</p>
             </div>
           </div>
-          <h2 className="font-display font-semibold text-signal text-lg">${budget.amount}</h2>
+          <h2 className="font-display font-semibold text-signal text-lg">{format(budget.amount)}</h2>
         </div>
         <div className="mt-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-mist font-thin">${budget.totalSpend || 0} Spend</span>
-            <span className="text-xs text-mist font-thin">${budget.amount - (budget.totalSpend || 0)} Remaining</span>
+            <span className="text-xs text-mist font-thin">{format(budget.totalSpend || 0)} Spend</span>
+            <span className="text-xs text-mist font-thin">{format(budget.amount - (budget.totalSpend || 0))} Remaining</span>
           </div>
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${calculateProgressPerc()}%` }} />

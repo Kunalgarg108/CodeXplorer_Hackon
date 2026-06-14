@@ -17,6 +17,7 @@ import budgetAlertRoutes from "./routes/budgetAlerts.js";
 import chatRoutes from "./routes/chat.js";
 import foodRecommendationRoutes from "./routes/foodRecommendations.js";
 import fitnessRoutes from "./routes/fitness.js";
+import currencyRoutes from "./routes/currency.js";
 import thresholdRoutes from "./routes/thresholds.js";
 import alertRoutes from "./routes/alerts.js";
 import reportRoutes from "./routes/reports.js";
@@ -45,6 +46,7 @@ app.use("/api/budget-alerts", budgetAlertRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/food-recommendations", foodRecommendationRoutes);
 app.use("/api/fitness", fitnessRoutes);
+app.use("/api/currency", currencyRoutes);
 
 
 app.use("/api/thresholds", thresholdRoutes);

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export function TransactionList({ filters = "" }) {
+  const { format } = useCurrency();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -294,8 +296,8 @@ export function TransactionList({ filters = "" }) {
                           : "text-[#00cc4b]"
                       }
                     >
-                      {txn.transactionType === "DEBIT" ? "-" : "+"} ₹
-                      {txn.amount.toFixed(2)}
+                      {txn.transactionType === "DEBIT" ? "-" : "+"}{" "}
+                      {format(txn.amount)}
                     </span>
                   </td>
                   <td className="px-4 py-3">

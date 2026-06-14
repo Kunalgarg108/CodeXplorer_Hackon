@@ -1,4 +1,7 @@
+import { useCurrency } from "@/context/CurrencyContext";
+
 export default function IncomeItem({ budget }) {
+  const { format } = useCurrency();
   return (
     <div className="neo-card hover:shadow-neo-glow transition-shadow cursor-pointer h-[170px]">
       <div className="flex gap-3 items-center justify-between">
@@ -9,7 +12,7 @@ export default function IncomeItem({ budget }) {
             <p className="text-xs text-mist font-thin">Monthly income</p>
           </div>
         </div>
-        <h2 className="font-display font-semibold text-tag-lime text-lg">${budget.amount}</h2>
+        <h2 className="font-display font-semibold text-tag-lime text-lg">{format(budget.amount)}</h2>
       </div>
     </div>
   );

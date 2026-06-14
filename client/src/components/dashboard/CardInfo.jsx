@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { PiggyBank, ReceiptText, Wallet, Sparkles, CircleDollarSign } from "lucide-react";
-import formatNumber from "@/utils/formatNumber";
 import { api } from "@/lib/api";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function CardInfo({ budgetList, incomeList, onlyAdvice, onlyCards }) {
+  const { format } = useCurrency();
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpend, setTotalSpend] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
@@ -38,10 +39,10 @@ export default function CardInfo({ budgetList, incomeList, onlyAdvice, onlyCards
   }, [totalBudget, totalIncome, totalSpend, onlyCards]);
 
   const statCards = [
-    { label: "Total Budget", value: `$${formatNumber(totalBudget)}`, icon: PiggyBank },
-    { label: "Total Spend", value: `$${formatNumber(totalSpend)}`, icon: ReceiptText },
+    { label: "Total Budget", value: format(totalBudget), icon: PiggyBank },
+    { label: "Total Spend", value: format(totalSpend), icon: ReceiptText },
     { label: "No. Of Budget", value: budgetList?.length, icon: Wallet },
-    { label: "Sum of Income Streams", value: `$${formatNumber(totalIncome)}`, icon: CircleDollarSign },
+    { label: "Sum of Income Streams", value: format(totalIncome), icon: CircleDollarSign },
   ];
 
   if (onlyAdvice) {

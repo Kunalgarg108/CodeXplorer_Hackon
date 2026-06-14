@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { api } from "@/lib/api";
+import { useCurrency } from "@/context/CurrencyContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Utensils, RefreshCw, Star, Filter, ArrowUpDown,
@@ -103,6 +104,7 @@ const WELLNESS_OPTIONS = [
 ];
 
 export default function AiFoodRecommendations() {
+  const { format } = useCurrency();
   const [allRecommendations, setAllRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -267,10 +269,10 @@ export default function AiFoodRecommendations() {
               <div className="flex flex-wrap gap-2">
                 {[
                   { label: "All", value: null },
-                  { label: "Under $5", value: 5 },
-                  { label: "Under $10", value: 10 },
-                  { label: "Under $15", value: 15 },
-                  { label: "Under $20", value: 20 },
+                  { label: `Under ${format(5)}`, value: 5 },
+                  { label: `Under ${format(10)}`, value: 10 },
+                  { label: `Under ${format(15)}`, value: 15 },
+                  { label: `Under ${format(20)}`, value: 20 },
                 ].map((opt) => (
                   <Chip key={opt.label} active={maxPrice === opt.value} onClick={() => setMaxPrice(opt.value)}>
                     {opt.label}
@@ -366,7 +368,7 @@ export default function AiFoodRecommendations() {
                       <p className="text-[12px] text-white/40 font-thin mt-0.5">{item.restaurant}</p>
                     )}
                   </div>
-                  <p className="text-signal font-bold text-[18px] shrink-0">${item.price}</p>
+                  <p className="text-signal font-bold text-[18px] shrink-0">{format(item.price)}</p>
                 </div>
 
                 {/* Score bar */}

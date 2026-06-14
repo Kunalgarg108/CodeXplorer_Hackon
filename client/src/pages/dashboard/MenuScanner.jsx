@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { menuApi } from "@/lib/menuApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCurrency } from "@/context/CurrencyContext";
 import AiFoodRecommendations from "@/components/dashboard/AiFoodRecommendations";
 
 const POLL_INTERVAL_MS = 3000;
@@ -35,6 +36,7 @@ const extractMenuItems = (data) => {
 };
 
 export default function MenuScanner() {
+  const { format } = useCurrency();
   const [restaurantName, setRestaurantName] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -288,7 +290,7 @@ export default function MenuScanner() {
                       <div className="flex justify-between md:block gap-4 mb-2 md:mb-0">
                         <span className="text-mist text-xs uppercase md:hidden">Price</span>
                         <span className="text-signal font-thin text-sm">
-                          {item.price != null ? `$${item.price}` : "—"}
+                          {item.price != null ? format(item.price) : "—"}
                         </span>
                       </div>
                       <div className="flex justify-between md:block gap-4">

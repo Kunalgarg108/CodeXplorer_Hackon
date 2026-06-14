@@ -15,6 +15,7 @@ import {
   Bar,
 } from "recharts";
 import { api } from "@/lib/api";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const COLORS = [
   "#1c6cff", // neon blue
@@ -29,6 +30,7 @@ const COLORS = [
 ];
 
 export function AnalyticsDashboard({ filters = "" }) {
+  const { format } = useCurrency();
   const [summary, setSummary] = useState(null);
   const [trends, setTrends] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -84,19 +86,19 @@ export function AnalyticsDashboard({ filters = "" }) {
   const summaryCards = [
     {
       label: "Total Spent",
-      value: `₹${summary.stats.totalSpent?.toFixed(2) || "0.00"}`,
+      value: format(summary.stats.totalSpent || 0),
       color: "text-[#ff4433]",
       bg: "bg-[#ff4433]/10 border border-[#ff4433]/20",
     },
     {
       label: "Total Received",
-      value: `₹${summary.stats.totalReceived?.toFixed(2) || "0.00"}`,
+      value: format(summary.stats.totalReceived || 0),
       color: "text-[#00cc4b]",
       bg: "bg-[#00cc4b]/10 border border-[#00cc4b]/20",
     },
     {
       label: "Net Spend",
-      value: `₹${summary.stats.netSpend?.toFixed(2) || "0.00"}`,
+      value: format(summary.stats.netSpend || 0),
       color: summary.stats.netSpend > 0 ? "text-[#ff8833]" : "text-[#00cc4b]",
       bg: summary.stats.netSpend > 0 ? "bg-[#ff8833]/10 border border-[#ff8833]/20" : "bg-[#00cc4b]/10 border border-[#00cc4b]/20",
     },
@@ -153,7 +155,7 @@ export function AnalyticsDashboard({ filters = "" }) {
                   contentStyle={{ backgroundColor: '#010d1e', borderColor: '#11263b', borderRadius: '12px' }}
                   itemStyle={{ color: '#f8fafc' }}
                   labelStyle={{ color: '#94a3b8' }}
-                  formatter={(value) => `₹${value.toFixed(2)}`}
+                  formatter={(value) => format(value)}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -183,7 +185,7 @@ export function AnalyticsDashboard({ filters = "" }) {
                   contentStyle={{ backgroundColor: '#010d1e', borderColor: '#11263b', borderRadius: '12px' }}
                   itemStyle={{ color: '#f8fafc' }}
                   labelStyle={{ color: '#94a3b8' }}
-                  formatter={(value) => `₹${value.toFixed(2)}`}
+                  formatter={(value) => format(value)}
                 />
                 <Bar dataKey="amount" fill="#1c6cff" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -208,7 +210,7 @@ export function AnalyticsDashboard({ filters = "" }) {
                 contentStyle={{ backgroundColor: '#010d1e', borderColor: '#11263b', borderRadius: '12px' }}
                 itemStyle={{ color: '#f8fafc' }}
                 labelStyle={{ color: '#94a3b8' }}
-                formatter={(value) => `₹${value.toFixed(2)}`}
+                formatter={(value) => format(value)}
               />
               <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
               <Line
@@ -250,7 +252,7 @@ export function AnalyticsDashboard({ filters = "" }) {
               </div>
               <div className="text-right">
                 <p className="text-sm font-black text-white">
-                  ₹{item.amount.toFixed(2)}
+                  {format(item.amount)}
                 </p>
                 <p className="text-xs text-fog mt-0.5">
                   {item.count} transactions
