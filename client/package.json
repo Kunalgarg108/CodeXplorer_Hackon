@@ -12,6 +12,8 @@
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-slot": "^1.0.2",
+    "@splinetool/react-spline": "^4.1.0",
+    "@splinetool/runtime": "^1.12.97",
     "axios": "^1.17.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
