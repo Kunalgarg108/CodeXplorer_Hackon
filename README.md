@@ -28,9 +28,18 @@ Copy `server/.env.example` to `server/.env` and update values:
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/finan-smart
-JWT_SECRET=your-secret-key
-OPENAI_API_KEY=your-openai-key   # optional, for AI advice
+MONGODB_URI=...
+JWT_SECRET=your-super-secret-jwt-key-change-this
+OPENAI_API_KEY=...
+OPENAI_BASE_URL=https://bedrock-mantle.ap-south-1.api.aws/v1
+OPENAI_PROJECT_ID=default
+OPENAI_MODEL=openai.gpt-oss-120b
+VISION_MODEL=us.anthropic.claude-haiku-4-5-20251001-v1:0
+AWS_REGION=ap-south-1
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+EXCHANGE_RATE_API_KEY=...
+DEFAULT_CURRENCY=USD
 ```
 
 ### 3. Start MongoDB
