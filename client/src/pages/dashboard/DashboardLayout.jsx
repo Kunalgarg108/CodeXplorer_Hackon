@@ -1,19 +1,22 @@
 import React, { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, CircleDollarSign, LineChart,
+  LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, CircleDollarSign, LineChart, ScanLine, Heart, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
 const menuList = [
-  { name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
-  { name: "Transactions", icon: LineChart, path: "/dashboard/transactions" },
-  { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes" },
-  { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets" },
-  { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses" },
-  { name: "Upgrade", icon: ShieldCheck, path: "/dashboard/upgrade" },
+  { name: "Dashboard", icon: LayoutGrid, path: "/dashboard", colorClass: "text-[#1c6cff]" },
+  { name: "Transactions", icon: LineChart, path: "/dashboard/transactions", colorClass: "text-[#818cf8]" },
+  { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes", colorClass: "text-[#00acfe]" },
+  { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets", colorClass: "text-[#00cc4b]" },
+  { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses", colorClass: "text-[#ff8833]" },
+  { name: "Pocket Buddy AI", icon: Sparkles, path: "/dashboard/pocket-buddy", colorClass: "text-[#a855f7]" },
+  { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner", colorClass: "text-cyan-400" },
+  { name: "Wellness Profile", icon: Heart, path: "/dashboard/wellness", colorClass: "text-tag-coral" },
+  { name: "Upgrade", icon: ShieldCheck, path: "/dashboard/upgrade", colorClass: "text-amber-400" },
 ];
 
 export default function DashboardLayout() {
@@ -43,20 +46,30 @@ export default function DashboardLayout() {
             {menuList.map((menu, index) => (
               <Link to={menu.path} key={index}>
                 <div className={`nav-link ${path === menu.path ? "nav-link-active" : ""}`}>
-                  <menu.icon size={18} />
+                  <menu.icon size={18} className={path === menu.path ? "text-[#1c6cff]" : menu.colorClass} />
                   {menu.name}
                 </div>
               </Link>
             ))}
           </nav>
-          <div className="fixed bottom-8 left-6 right-6 md:right-auto md:w-52 flex gap-3 items-center p-4 neo-card">
-            <div className="w-9 h-9 rounded-btn bg-signal text-paper flex items-center justify-center text-sm font-display font-semibold">
-              {user?.name?.[0]?.toUpperCase()}
-            </div>
-            <div>
-              <p className="text-sm text-paper font-thin">{user?.name}</p>
-              <Button variant="link" className="p-0 h-auto text-xs text-fog" onClick={logout}>Logout</Button>
-            </div>
+          <div
+            className="fixed bottom-8 left-6 right-6 md:right-auto md:w-52 flex justify-between items-center p-4 neo-card cursor-pointer hover:border-signal/30 transition-all"
+            onClick={() => navigate("/dashboard/profile")}
+          >
+                  <div className="w-9 h-9 rounded-btn bg-signal text-paper flex items-center justify-center text-sm font-display font-semibold transition-all duration-300 hover:scale-125 hover:shadow-[0_0_20px_rgba(28,108,255,0.6)]">
+        {user?.name?.[0]?.toUpperCase()}
+      </div>
+
+            <Button
+              variant="link"
+              className="p-0 h-auto text-xl text-white hover:text-fog"
+              onClick={(e) => {
+                e.stopPropagation();
+                logout();
+              }}
+            >
+              Logout
+            </Button>
           </div>
         </div>
       </div>

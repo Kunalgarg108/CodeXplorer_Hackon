@@ -46,6 +46,7 @@ export const api = {
   login: (body) =>
     request("/auth/login", { method: "POST", body: JSON.stringify(body) }),
   me: () => request("/auth/me"),
+  updateProfile: (body) => request("/auth/profile", { method: "PUT", body: JSON.stringify(body) }),
 
   getBudgets: () => request("/budgets"),
   getBudget: (id) => request(`/budgets/${id}`),
@@ -123,4 +124,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+
+  getBudgetAlerts: () => request("/budget-alerts"),
+  sendChatMessage: (body) => request("/chat", { method: "POST", body: JSON.stringify(body) }),
+  getFoodRecommendations: () => request("/food-recommendations"),
+  getWellnessProfile: () => request("/wellness"),
+  updateWellnessProfile: (body) => request("/wellness", { method: "PUT", body: JSON.stringify(body) }),
+  analyzeBurnout: () => request("/wellness/analyze"),
+  analyzeWeeklyReport: () => request("/wellness/weekly"),
+  submitDailyCheckin: (body) => request("/wellness/checkin", { method: "POST", body: JSON.stringify(body) }),
+  resolveBurnout: () => request("/wellness/resolve-burnout", { method: "POST" }),
 };
