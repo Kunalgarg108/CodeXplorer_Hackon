@@ -48,7 +48,8 @@ Respond in JSON: {"summary":"1-2 sentence weekly summary","trendDirection":"up/d
     );
 
     if (!content) return fallbackWeeklyAnalysis(checkins);
-    const parsed = JSON.parse(content);
+    let parsed;
+    try { parsed = JSON.parse(content.trim()); } catch { const m = content.match(/\{[\s\S]*\}/); if (m) parsed = JSON.parse(m[0]); else return fallbackWeeklyAnalysis(checkins); }
     return { summary: parsed.summary, trendDirection: parsed.trendDirection || "flat", trendPercentage: Number(parsed.trendPercentage) || 0, source: "AI Analysis" };
   } catch (error) {
     console.error("Error generating weekly analysis:", error.message);

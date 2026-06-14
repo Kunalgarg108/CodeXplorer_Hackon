@@ -100,7 +100,19 @@ Respond in JSON:
       return { ...getFallbackAnalysis(today, wellnessState, checkins), source: "Quick Analysis" };
     }
 
-    const parsed = JSON.parse(content);
+    // Safely parse JSON — handle markdown fencing or extra whitespace
+    let parsed;
+    try {
+      parsed = JSON.parse(content.trim());
+    } catch {
+      // Try extracting JSON object from response
+      const match = content.match(/\{[\s\S]*\}/);
+      if (match) {
+        parsed = JSON.parse(match[0]);
+      } else {
+        return { ...getFallbackAnalysis(today, wellnessState, checkins), source: "Quick Analysis" };
+      }
+    }
     return { ...parsed, source: "AI Analysis" };
   } catch (error) {
     console.error("Error generating burnout analysis:", error.message);

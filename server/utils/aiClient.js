@@ -69,12 +69,9 @@ export async function chatCompletion(messages, options = {}) {
     temperature,
   };
 
-  if (jsonMode) {
-    requestBody.response_format = { type: "json_object" };
-  }
-
   const response = await client.chat.completions.create(requestBody);
   const content = response.choices[0]?.message?.content || null;
+  if (!content) return null;
   return jsonMode ? content : stripMarkdown(content);
 }
 
