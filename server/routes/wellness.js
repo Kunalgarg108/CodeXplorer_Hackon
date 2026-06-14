@@ -8,6 +8,9 @@ import { getWeeklyAnalysis } from "../utils/getWeeklyAnalysis.js";
 
 const router = express.Router();
 
+const burnoutCache = new Map(); // userId -> { contextStr, analysis }
+const weeklyWellnessCache = new Map(); // userId -> { contextStr, analysis }
+
 export function updateBurnoutState(history, state = {}) {
   if (!history || history.length === 0) {
     return {
@@ -316,8 +319,28 @@ router.get("/analyze", auth, async (req, res) => {
       recoveryDaysCompleted: profile.recoveryDaysCompleted || 0
     };
 
-    // Run burnout analysis combining profile + finance data + wellnessState
-    const analysis = await getBurnoutAnalysis(profile, financeData, wellnessState);
+    const context = {
+      semester: profile.semester || "unknown",
+      examDate: profile.examDate || null,
+      sleepHours: profile.sleepHours || 6,
+      studyHours: profile.studyHours || 6,
+      hasJob: profile.hasJob || false,
+      checkinsCount: profile.dailyCheckins?.length || 0,
+      lastCheckin: profile.dailyCheckins?.length > 0 ? profile.dailyCheckins[profile.dailyCheckins.length - 1] : null,
+      financeData,
+      wellnessState
+    };
+    const currentContextStr = JSON.stringify(context);
+    const userId = req.user.id;
+    const cached = burnoutCache.get(userId);
+
+    let analysis;
+    if (cached && cached.contextStr === currentContextStr) {
+      analysis = cached.analysis;
+    } else {
+      analysis = await getBurnoutAnalysis(profile, financeData, wellnessState);
+      burnoutCache.set(userId, { contextStr: currentContextStr, analysis });
+    }
     
     res.json({
       ...analysis,
@@ -348,7 +371,21 @@ router.get("/weekly", auth, async (req, res) => {
       });
     }
 
-    const analysis = await getWeeklyAnalysis(checkins);
+    const context = {
+      checkinsCount: checkins.length,
+      lastCheckin: checkins.length > 0 ? checkins[checkins.length - 1] : null
+    };
+    const currentContextStr = JSON.stringify(context);
+    const userId = req.user.id;
+    const cached = weeklyWellnessCache.get(userId);
+
+    let analysis;
+    if (cached && cached.contextStr === currentContextStr) {
+      analysis = cached.analysis;
+    } else {
+      analysis = await getWeeklyAnalysis(checkins);
+      weeklyWellnessCache.set(userId, { contextStr: currentContextStr, analysis });
+    }
     res.json(analysis);
   } catch (error) {
     res.status(500).json({ message: error.message });

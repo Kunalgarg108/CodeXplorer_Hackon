@@ -6,6 +6,8 @@ import generateAlertsWithAI from "../utils/getBudgetAlerts.js";
 
 const router = express.Router();
 
+const alertsCache = new Map(); // userId -> { cacheKey, alerts }
+
 router.get("/", auth, async (req, res) => {
   try {
     const budgets = await Budget.find({ createdBy: req.user.email });
@@ -85,7 +87,16 @@ router.get("/", auth, async (req, res) => {
       return res.json({ alerts: [], budgetSummaries });
     }
 
-    const alerts = await generateAlertsWithAI(activeBudgets);
+    const cacheKey = JSON.stringify(activeBudgets);
+    const userId = req.user.id;
+    const cached = alertsCache.get(userId);
+    let alerts;
+    if (cached && cached.cacheKey === cacheKey) {
+      alerts = cached.alerts;
+    } else {
+      alerts = await generateAlertsWithAI(activeBudgets);
+      alertsCache.set(userId, { cacheKey, alerts });
+    }
 
     res.json({ alerts, budgetSummaries });
   } catch (error) {
