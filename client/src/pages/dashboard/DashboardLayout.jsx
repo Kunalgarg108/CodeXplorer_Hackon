@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutGrid, PiggyBank, ReceiptText, CircleDollarSign, ScanLine,
-  Heart, Sparkles, Activity,LineChart
+  Heart, Sparkles, Activity, LineChart, Menu, X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
@@ -15,7 +16,6 @@ const menuList = [
   { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes", colorClass: "text-[#00acfe]" },
   { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets", colorClass: "text-[#00cc4b]" },
   { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses", colorClass: "text-[#ff8833]" },
-  
   { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner", colorClass: "text-cyan-400" },
   { name: "Wellness Profile", icon: Heart, path: "/dashboard/wellness", colorClass: "text-tag-coral" },
   { name: "Fitness", icon: Activity, path: "/dashboard/fitness", colorClass: "text-[#00cc4b]" },
@@ -25,6 +25,8 @@ export default function DashboardLayout() {
   const path = useLocation().pathname;
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { currency, setCurrency, currencies } = useCurrency();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (user && path === "/dashboard") {
@@ -34,59 +36,123 @@ export default function DashboardLayout() {
     }
   }, [user, path, navigate]);
 
-  return (
-    <div className="min-h-screen bg-midnight">
-      <div className="fixed md:w-[270px] hidden md:block z-40 h-screen">
-        <div className="h-full p-6 bg-deep border-r border-steel/30 shadow-neo flex flex-col justify-between">
-          <div className="flex flex-col flex-1 min-h-0">
-            <Link to="/" className="flex items-center gap-3 mb-8 shrink-0 hover:opacity-90 transition-opacity">
-              <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
-                <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
-              </div>
-              <span className="font-display font-medium text-paper">PocketBuddy</span>
-            </Link>
-            <nav className="mt-2 overflow-y-auto flex-1 sidebar-scroll pr-1">
-              {menuList.map((menu, index) => (
-                <Link to={menu.path} key={index}>
-                  <div className={`nav-link ${path === menu.path ? "nav-link-active" : ""}`}>
-                    <menu.icon size={18} className={path === menu.path ? "text-[#1c6cff]" : menu.colorClass} />
-                    {menu.name}
-                  </div>
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <div
-            className="mt-6 flex justify-between items-center p-4 neo-card cursor-pointer hover:border-signal/30 transition-all shrink-0 w-full"
-            onClick={() => navigate("/dashboard/profile")}
-          >
-            <div className="w-9 h-9 rounded-btn bg-signal text-paper flex items-center justify-center text-sm font-display font-semibold transition-all duration-300 hover:scale-125 hover:shadow-[0_0_20px_rgba(28,108,255,0.6)]">
-              {user?.name?.[0]?.toUpperCase()}
-            </div>
+  // Close drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [path]);
 
-            <Button
-              variant="link"
-              className="p-0 h-auto text-xl text-white hover:text-fog"
-              onClick={(e) => {
-                e.stopPropagation();
-                logout();
-              }}
-            >
-              Logout
-            </Button>
+  const handleNavClick = (menuPath) => {
+    navigate(menuPath);
+    setMobileOpen(false);
+  };
+
+  const handleLogout = () => {
+    setMobileOpen(false);
+    logout();
+  };
+
+  const SidebarContent = () => (
+    <>
+      <div className="flex items-center gap-3 mb-8 shrink-0">
+        <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
+          <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
+        </div>
+        <span className="font-display font-medium text-paper text-lg">PocketBuddy</span>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto sidebar-scroll pr-1">
+        {menuList.map((menu, index) => (
+          <div
+            key={index}
+            onClick={() => handleNavClick(menu.path)}
+            className={`nav-link cursor-pointer ${path === menu.path ? "nav-link-active" : ""}`}
+          >
+            <menu.icon size={18} className={path === menu.path ? "text-[#1c6cff]" : menu.colorClass} />
+            {menu.name}
           </div>
+        ))}
+      </nav>
+
+      <div className="mt-4 space-y-3 shrink-0">
+        <div className="px-3 py-2 neo-card">
+          <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1.5">Currency</p>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="w-full bg-indigo/20 border border-steel/30 rounded-lg px-2.5 py-1.5 text-[13px] text-white font-thin focus:outline-none focus:border-signal/50 appearance-none cursor-pointer"
+          >
+            {currencies.map((c) => (
+              <option key={c.code} value={c.code} className="bg-deep text-white">
+                {c.symbol} {c.code}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div
+          className="flex justify-between items-center p-4 neo-card cursor-pointer hover:border-signal/30 transition-all w-full"
+          onClick={() => handleNavClick("/dashboard/profile")}
+        >
+          <div className="w-9 h-9 rounded-btn bg-signal text-paper flex items-center justify-center text-sm font-display font-semibold">
+            {user?.name?.[0]?.toUpperCase()}
+          </div>
+          <Button
+            variant="link"
+            className="p-0 h-auto text-base text-white hover:text-fog"
+            onClick={(e) => { e.stopPropagation(); handleLogout(); }}
+          >
+            Logout
+          </Button>
         </div>
       </div>
-      <div className="md:ml-[270px] min-h-screen">
-        <div className="p-4 border-b border-steel/30 flex justify-between items-center md:hidden bg-deep">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <div className="w-6 h-6 rounded bg-paper flex items-center justify-center">
-              <img src="/chart-donut.svg" alt="logo" width={14} height={14} />
-            </div>
-            <span className="font-display text-paper text-sm font-semibold">PocketBuddy</span>
-          </Link>
-          <Button variant="outline" size="sm" onClick={logout}>Logout</Button>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-midnight">
+      {/* Desktop Sidebar */}
+      <div className="fixed md:w-[270px] hidden md:block z-40 h-screen">
+        <div className="h-full p-6 bg-deep border-r border-steel/30 shadow-neo flex flex-col">
+          <SidebarContent />
         </div>
+      </div>
+
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-deep border-b border-steel/30 px-4 py-3 flex items-center gap-3">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-1.5 rounded-lg hover:bg-indigo/30 transition-colors"
+        >
+          <Menu className="w-6 h-6 text-white" />
+        </button>
+        <span className="font-display font-medium text-paper text-base">PocketBuddy</span>
+      </div>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-[60] bg-black/60"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile Drawer */}
+      <div
+        className={`md:hidden fixed top-0 left-0 bottom-0 z-[70] w-[280px] bg-deep border-r border-steel/30 shadow-2xl p-6 flex flex-col transform transition-transform duration-300 ease-in-out ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-indigo/30 transition-colors"
+        >
+          <X className="w-5 h-5 text-white/60" />
+        </button>
+        <SidebarContent />
+      </div>
+
+      {/* Main Content */}
+      <div className="md:ml-[270px] min-h-screen pt-[56px] md:pt-0">
         <Outlet />
       </div>
     </div>

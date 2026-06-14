@@ -78,7 +78,7 @@ ${menuSection}
 
 ${context.wellnessSummary ? `WELLNESS: Sleep ${context.wellnessSummary.sleepHours}hrs, Stress ${context.wellnessSummary.stressLevel}/5, Study ${context.wellnessSummary.studyHours}hrs` : ""}
 
-RULES: Use $ for currency. Only recommend menu items from data above. Never invent items. Be concise (2-4 sentences). Be empathetic.`;
+RULES: Use the user's preferred currency symbol when mentioning prices. Only recommend menu items from data above. Never invent items. Be concise (2-4 sentences). Be empathetic.`;
 
     console.log(`[Chat] Using TEXT MODEL: ${getTextModel()} via ${process.env.OPENAI_BASE_URL}`);
 

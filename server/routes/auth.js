@@ -101,8 +101,14 @@ router.put("/profile", async (req, res) => {
     if (name !== undefined) updateFields.name = name;
     if (dateOfBirth !== undefined) updateFields.dateOfBirth = dateOfBirth || null;
     if (college !== undefined) updateFields.college = college;
-    if (course !== undefined) updateFields.course = course;
-    if (semester !== undefined) updateFields.semester = semester;
+    if (course !== undefined) {
+      updateFields.course = course;
+      updateFields["wellnessProfile.degree"] = course; // sync to wellness
+    }
+    if (semester !== undefined) {
+      updateFields.semester = semester;
+      updateFields["wellnessProfile.semester"] = semester; // sync to wellness
+    }
 
     const user = await User.findByIdAndUpdate(decoded.id, updateFields, { new: true }).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const CHEAPER_ALTERNATIVES = {
   starbucks: { alternative: "local cafes or home-brewed coffee", savingPercent: 70, icon: "☕" },
@@ -13,6 +14,7 @@ const CHEAPER_ALTERNATIVES = {
 };
 
 export function InsightCards() {
+  const { format } = useCurrency();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -155,9 +157,9 @@ export function InsightCards() {
                     </div>
 
                     <div className="text-right">
-                      <p className="font-extrabold text-white text-base">₹{sub.amount.toFixed(0)}/mo</p>
+                      <p className="font-extrabold text-white text-base">{format(sub.amount)}/mo</p>
                       <p className="text-xs text-[#ff4433] font-semibold mt-0.5">
-                        ₹{yearlyCost.toLocaleString()}/year
+                        {format(yearlyCost)}/year
                       </p>
                     </div>
                   </div>
@@ -202,8 +204,8 @@ export function InsightCards() {
                       </span>
                     </div>
                     <p className="text-xs text-fog leading-relaxed">
-                      Spent: <span className="font-semibold text-white">₹{swap.spent.toLocaleString()}</span>. 
-                      Switching to <span className="font-semibold text-[#00cc4b]">{swap.alternative}</span> could save you up to <span className="font-bold text-[#00cc4b]">₹{swap.potentialSaving.toFixed(0)}</span> this month!
+                      Spent: <span className="font-semibold text-white">{format(swap.spent)}</span>. 
+                      Switching to <span className="font-semibold text-[#00cc4b]">{swap.alternative}</span> could save you up to <span className="font-bold text-[#00cc4b]">{format(swap.potentialSaving)}</span> this month!
                     </p>
                   </div>
                 </div>
@@ -225,10 +227,10 @@ export function InsightCards() {
                 <div>
                   <span className="font-bold text-white">{breach.category}</span>
                   <span className="text-mist mx-2">•</span>
-                  <span className="text-fog">Spent: ₹{breach.currentSpent.toLocaleString()} of ₹{breach.thresholdAmount.toLocaleString()}</span>
+                  <span className="text-fog">Spent: {format(breach.currentSpent)} of {format(breach.thresholdAmount)}</span>
                 </div>
                 <div className="text-[#ff4433] font-bold mt-1 md:mt-0">
-                  Over limit by ₹{breach.excess.toLocaleString()}
+                  Over limit by {format(breach.excess)}
                 </div>
               </div>
             ))}

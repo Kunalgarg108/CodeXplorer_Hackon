@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { api } from "@/lib/api";
 import BarChartDashboard from "@/components/dashboard/BarChartDashboard";
 import { Sparkles, HeartPulse, RefreshCw, Moon, Wind, Apple, Shield, Smile, Receipt, TrendingUp, Lightbulb, Wallet } from "lucide-react";
@@ -10,6 +11,7 @@ import RecoveryStatusCard from "@/components/dashboard/RecoveryStatusCard";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { format } = useCurrency();
   const [budgetList, setBudgetList] = useState([]);
   const [incomeList, setIncomeList] = useState([]);
   const [expensesList, setExpensesList] = useState([]);
@@ -189,10 +191,10 @@ export default function Dashboard() {
             <p className="text-[12px] font-semibold text-mist uppercase tracking-[0.05em] mb-2">Financial Health</p>
             <div className="flex items-baseline gap-1.5 mb-5">
               <span className="text-[32px] font-bold text-paper font-display leading-none">
-                ${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                {format(totalSpend)}
               </span>
               <span className="text-[14px] font-normal text-mist">
-                spent of ${totalBudget.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} budget
+                spent of {format(totalBudget)} budget
               </span>
             </div>
             
@@ -208,7 +210,7 @@ export default function Dashboard() {
             </div>
             {/* Subtext below bar */}
             <div className="text-[12px] text-mist mt-3 font-light">
-              {(totalBudget > 0 ? Math.min((totalSpend / totalBudget) * 100, 100) : 0).toFixed(0)}% of budget used · ${Math.max(0, totalBudget - totalSpend).toLocaleString()} remaining
+              {(totalBudget > 0 ? Math.min((totalSpend / totalBudget) * 100, 100) : 0).toFixed(0)}% of budget used · {format(Math.max(0, totalBudget - totalSpend))} remaining
             </div>
           </div>
 
@@ -231,7 +233,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <span className="text-[26px] font-bold text-signal block leading-none">
-                ${totalIncome.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                {format(totalIncome)}
               </span>
             </div>
           </div>
@@ -366,7 +368,7 @@ export default function Dashboard() {
                   <div key={budget.id || budget._id} className="flex flex-col gap-2">
                     <div className="flex justify-between items-center text-sm">
                       <span className="font-semibold text-paper">{budget.name}</span>
-                      <span className="text-fog font-light">${budget.totalSpend || 0} / ${budget.amount}</span>
+                      <span className="text-fog font-light">{format(budget.totalSpend || 0)} / {format(budget.amount)}</span>
                     </div>
                     <div className="w-full bg-[#11263b]/50 rounded-full h-1.5 overflow-hidden border border-[#11263b]/20">
                       <div 
@@ -407,7 +409,7 @@ export default function Dashboard() {
                       <span className="text-xs text-mist font-light block leading-normal mt-1">{expense.createdAt}</span>
                     </div>
                   </div>
-                  <span className="text-sm font-semibold text-signal">${expense.amount}</span>
+                  <span className="text-sm font-semibold text-signal">{format(expense.amount)}</span>
                 </div>
               ))
             ) : (

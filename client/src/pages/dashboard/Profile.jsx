@@ -23,12 +23,13 @@ export default function Profile() {
 
   useEffect(() => {
     if (user) {
+      const wp = user.wellnessProfile || {};
       setForm({
         name: user.name || "",
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split("T")[0] : "",
         college: user.college || "",
-        course: user.course || "",
-        semester: user.semester || "",
+        course: user.course || wp.degree || "",
+        semester: user.semester || wp.semester || "",
       });
     }
   }, [user]);
@@ -61,12 +62,13 @@ export default function Profile() {
   };
 
   const handleCancel = () => {
+    const wp = user?.wellnessProfile || {};
     setForm({
       name: user?.name || "",
       dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split("T")[0] : "",
       college: user?.college || "",
-      course: user?.course || "",
-      semester: user?.semester || "",
+      course: user?.course || wp.degree || "",
+      semester: user?.semester || wp.semester || "",
     });
     setEditing(false);
   };
@@ -218,7 +220,7 @@ export default function Profile() {
                 />
               ) : (
                 <p className="text-[16px] text-white font-normal py-2 px-3 rounded-lg bg-indigo/10 border border-steel/10">
-                  {user?.course || "Not set"}
+                  {user?.course || user?.wellnessProfile?.degree || "Not set"}
                 </p>
               )}
             </div>
@@ -243,7 +245,7 @@ export default function Profile() {
                 </select>
               ) : (
                 <p className="text-[16px] text-white font-normal py-2 px-3 rounded-lg bg-indigo/10 border border-steel/10">
-                  {user?.semester ? `Semester ${user.semester}` : "Not set"}
+                  {(user?.semester || user?.wellnessProfile?.semester) ? `Semester ${user?.semester || user?.wellnessProfile?.semester}` : "Not set"}
                 </p>
               )}
             </div>
