@@ -27,8 +27,8 @@ export default function CreateIncomes({ refreshData }) {
     <Dialog>
       <DialogTrigger asChild>
         <div className="neo-card-dashed p-10 items-center flex flex-col min-h-[150px] justify-center">
-          <span className="text-3xl text-signal font-display">+</span>
-          <span className="text-fog font-thin mt-2">Create New Income Source</span>
+          <span className="text-3xl text-signal font-bold">+</span>
+          <span className="text-paper font-medium mt-2">Create New Income Source</span>
         </div>
       </DialogTrigger>
       <DialogContent>

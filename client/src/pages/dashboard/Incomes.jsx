@@ -32,7 +32,7 @@ export default function Incomes() {
             ))
           ) : (
             <div className="neo-card p-6 flex items-center justify-center col-span-full">
-              <p className="text-mist text-sm font-thin">No income sources added yet.</p>
+              <p className="text-fog text-sm font-medium">No income sources added yet.</p>
             </div>
           )
         ) : (

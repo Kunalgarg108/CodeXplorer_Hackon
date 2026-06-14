@@ -39,7 +39,7 @@ export default function IncomeItem({ income, refreshData }) {
           <span className="text-2xl p-3 bg-indigo rounded-tag shadow-neo">{income?.icon}</span>
           <div>
             <h2 className="font-display font-medium text-paper">{income.name}</h2>
-            <p className="text-xs text-mist font-thin">Monthly income</p>
+            <p className="text-xs text-fog font-medium">Monthly income</p>
           </div>
         </div>
         <h2 className="font-display font-semibold text-tag-lime text-lg">{format(income.amount)}</h2>

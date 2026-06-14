@@ -16,15 +16,15 @@ export default function BudgetItem({ budget }) {
             <span className="text-2xl p-3 bg-indigo rounded-tag shadow-neo">{budget?.icon}</span>
             <div>
               <h2 className="font-display font-medium text-paper">{budget.name}</h2>
-              <p className="text-xs text-mist font-thin">{budget.totalItem} Item</p>
+              <p className="text-xs text-fog font-medium">{budget.totalItem} Item</p>
             </div>
           </div>
           <h2 className="font-display font-semibold text-signal text-lg">{format(budget.amount)}</h2>
         </div>
         <div className="mt-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-mist font-thin">{format(budget.totalSpend || 0)} Spend</span>
-            <span className="text-xs text-mist font-thin">{format(budget.amount - (budget.totalSpend || 0))} Remaining</span>
+            <span className="text-xs text-fog font-medium">{format(budget.totalSpend || 0)} Spend</span>
+            <span className="text-xs text-fog font-medium">{format(budget.amount - (budget.totalSpend || 0))} Remaining</span>
           </div>
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${calculateProgressPerc()}%` }} />
