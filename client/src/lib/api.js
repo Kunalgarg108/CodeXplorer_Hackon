@@ -47,6 +47,14 @@ export const api = {
 
   getFoodRecommendations: () => request("/food-recommendations"),
 
+  getFitness: () => request("/fitness"),
+  submitFitnessAssessment: (body) => request("/fitness/assessment", { method: "POST", body: JSON.stringify(body) }),
+  createFitnessGoal: (body) => request("/fitness/goals", { method: "POST", body: JSON.stringify(body) }),
+  updateFitnessGoal: (id, body) => request(`/fitness/goals/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  deleteFitnessGoal: (id) => request(`/fitness/goals/${id}`, { method: "DELETE" }),
+  updateStepGoal: (body) => request("/fitness/step-goal", { method: "PUT", body: JSON.stringify(body) }),
+  generateWorkout: (body) => request("/fitness/generate-workout", { method: "POST", body: JSON.stringify(body) }),
+
   getWellnessProfile: () => request("/wellness"),
   updateWellnessProfile: (body) => request("/wellness", { method: "PUT", body: JSON.stringify(body) }),
   analyzeBurnout: () => request("/wellness/analyze"),
