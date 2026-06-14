@@ -30,9 +30,39 @@ const STRESS_LEVELS = [
   { val: 5, label: "Extreme", emoji: "😫" }
 ];
 
+const getSemesterOptions = (degree) => {
+  if (!degree) return [];
+  if (degree === "Ph.D.") {
+    return [
+      { val: 1, label: "Year 1" },
+      { val: 2, label: "Year 2" },
+      { val: 3, label: "Year 3" },
+      { val: 4, label: "Year 4" },
+      { val: 5, label: "Year 5+" },
+    ];
+  }
+  
+  let totalSemesters = 8; // default to B.Tech
+  if (degree === "M.Tech" || degree === "MCA" || degree === "M.Sc" || degree === "M.A.") {
+    totalSemesters = 4;
+  } else if (degree === "BCA" || degree === "B.Sc" || degree === "B.A.") {
+    totalSemesters = 6;
+  }
+
+  const options = [];
+  for (let s = 1; s <= totalSemesters; s++) {
+    options.push({
+      val: s,
+      label: `Semester ${s} (${Math.ceil(s / 2)} Year)`,
+    });
+  }
+  return options;
+};
+
 export default function WellnessSurvey({ onComplete, onSkip }) {
   const [step, setStep] = useState(1);
   const [data, setData] = useState({
+    degree: "",
     semester: null,
     examDate: null,
     sleepHours: 6,
@@ -113,6 +143,16 @@ export default function WellnessSurvey({ onComplete, onSkip }) {
   }, [onComplete]);
 
   const handleNext = () => {
+    if (step === 1) {
+      if (!data.degree) {
+        toast.error("Please select your degree first.");
+        return;
+      }
+      if (!data.semester) {
+        toast.error(data.degree === "Ph.D." ? "Please select your year." : "Please select your semester.");
+        return;
+      }
+    }
     // Skip Step 5 (Cravings) if "Eat more" is not selected in Step 4
     if (step === 4 && !data.stressEatingPattern.includes("Eat more")) {
       setStep(6);
@@ -175,21 +215,56 @@ export default function WellnessSurvey({ onComplete, onSkip }) {
         </button>
       </div>
 
-      {/* STEP 1: Semester */}
+      {/* STEP 1: Degree & Semester */}
       {step === 1 && (
         <div className="space-y-4">
-          <h2 className="font-display font-medium text-xl text-paper">What year/semester are you currently in?</h2>
-          <div className="relative">
-            <select
-              value={data.semester || ""}
-              onChange={(e) => updateField("semester", e.target.value ? Number(e.target.value) : null)}
-              className="w-full bg-[#001533] border border-[#11263b] text-white rounded-lg p-3 outline-none focus:border-signal"
-            >
-              <option value="">Select your semester</option>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map(s => (
-                <option key={s} value={s}>Semester {s} ({Math.ceil(s/2)} Year)</option>
-              ))}
-            </select>
+          <h2 className="font-display font-medium text-xl text-paper">Select your degree and current status</h2>
+          
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-fog text-sm font-thin block">What degree are you currently pursuing?</label>
+              <select
+                value={data.degree || ""}
+                onChange={(e) => {
+                  updateField("degree", e.target.value);
+                  updateField("semester", null);
+                }}
+                className="w-full bg-[#001533] border border-[#11263b] text-white rounded-lg p-3 outline-none focus:border-signal"
+              >
+                <option value="">Select your degree</option>
+                <option value="B.Tech">B.Tech / B.E.</option>
+                <option value="M.Tech">M.Tech / M.E.</option>
+                <option value="MCA">MCA (Master of Computer Applications)</option>
+                <option value="BCA">BCA (Bachelor of Computer Applications)</option>
+                <option value="B.Sc">B.Sc (Bachelor of Science)</option>
+                <option value="M.Sc">M.Sc (Master of Science)</option>
+                <option value="B.A.">B.A. (Bachelor of Arts)</option>
+                <option value="M.A.">M.A. (Master of Arts)</option>
+                <option value="Ph.D.">Ph.D. (Doctor of Philosophy)</option>
+              </select>
+            </div>
+
+            {data.degree && (
+              <div className="space-y-1.5 animate-fade-in">
+                <label className="text-fog text-sm font-thin block">
+                  {data.degree === "Ph.D." ? "Which year are you currently in?" : "Which semester are you currently in?"}
+                </label>
+                <select
+                  value={data.semester || ""}
+                  onChange={(e) => updateField("semester", e.target.value ? Number(e.target.value) : null)}
+                  className="w-full bg-[#001533] border border-[#11263b] text-white rounded-lg p-3 outline-none focus:border-signal"
+                >
+                  <option value="">
+                    {data.degree === "Ph.D." ? "Select your Year" : "Select your Semester"}
+                  </option>
+                  {getSemesterOptions(data.degree).map((opt) => (
+                    <option key={opt.val} value={opt.val}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
       )}

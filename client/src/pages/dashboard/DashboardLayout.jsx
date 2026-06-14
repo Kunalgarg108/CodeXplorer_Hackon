@@ -51,10 +51,8 @@ export default function DashboardLayout() {
     logout();
   };
 
-  // Shared sidebar content (used by both desktop and mobile)
   const SidebarContent = () => (
     <>
-      {/* Logo */}
       <div className="flex items-center gap-3 mb-8 shrink-0">
         <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
           <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
@@ -62,7 +60,6 @@ export default function DashboardLayout() {
         <span className="font-display font-medium text-paper text-lg">PocketBuddy</span>
       </div>
 
-      {/* Nav Links */}
       <nav className="flex-1 overflow-y-auto sidebar-scroll pr-1">
         {menuList.map((menu, index) => (
           <div
@@ -76,9 +73,7 @@ export default function DashboardLayout() {
         ))}
       </nav>
 
-      {/* Bottom: Currency + Profile + Logout */}
       <div className="mt-4 space-y-3 shrink-0">
-        {/* Currency Selector */}
         <div className="px-3 py-2 neo-card">
           <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1.5">Currency</p>
           <select
@@ -94,7 +89,6 @@ export default function DashboardLayout() {
           </select>
         </div>
 
-        {/* Profile + Logout */}
         <div
           className="flex justify-between items-center p-4 neo-card cursor-pointer hover:border-signal/30 transition-all w-full"
           onClick={() => handleNavClick("/dashboard/profile")}
@@ -116,52 +110,48 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-midnight">
-      {/* DESKTOP SIDEBAR — hidden on mobile */}
+      {/* Desktop Sidebar */}
       <div className="fixed md:w-[270px] hidden md:block z-40 h-screen">
         <div className="h-full p-6 bg-deep border-r border-steel/30 shadow-neo flex flex-col">
           <SidebarContent />
         </div>
       </div>
 
-      {/* MOBILE TOP BAR — visible only on mobile */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-deep border-b border-steel/30 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="p-1.5 rounded-lg hover:bg-indigo/30 transition-colors"
-          >
-            <Menu className="w-6 h-6 text-white" />
-          </button>
-          <span className="font-display font-medium text-paper text-base">PocketBuddy</span>
-        </div>
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-deep border-b border-steel/30 px-4 py-3 flex items-center gap-3">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-1.5 rounded-lg hover:bg-indigo/30 transition-colors"
+        >
+          <Menu className="w-6 h-6 text-white" />
+        </button>
+        <span className="font-display font-medium text-paper text-base">PocketBuddy</span>
       </div>
 
-      {/* MOBILE DRAWER OVERLAY */}
+      {/* Mobile Overlay */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[60] bg-black/60 transition-opacity duration-300"
+          className="md:hidden fixed inset-0 z-[60] bg-black/60"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* MOBILE DRAWER */}
+      {/* Mobile Drawer */}
       <div
         className={`md:hidden fixed top-0 left-0 bottom-0 z-[70] w-[280px] bg-deep border-r border-steel/30 shadow-2xl p-6 flex flex-col transform transition-transform duration-300 ease-in-out ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Close button */}
         <button
           onClick={() => setMobileOpen(false)}
           className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-indigo/30 transition-colors"
         >
           <X className="w-5 h-5 text-white/60" />
         </button>
-
         <SidebarContent />
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* Main Content */}
       <div className="md:ml-[270px] min-h-screen pt-[56px] md:pt-0">
         <Outlet />
       </div>

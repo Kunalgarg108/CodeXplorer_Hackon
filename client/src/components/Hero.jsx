@@ -6,7 +6,7 @@ import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import {
   Lightbulb, Layers, Receipt, Coins, AreaChart, ShieldCheck,
   LayoutGrid, CircleDollarSign, PiggyBank, ReceiptText, ScanLine, Heart,
-  Landmark, Wallet, Sparkles, ShoppingCart, Plane
+  Landmark, Wallet, Sparkles, ShoppingCart, Plane, Activity, TrendingUp, LineChart, Wind
 } from "lucide-react";
 
 /* ─── tiny scroll-reveal hook ─── */
@@ -49,31 +49,40 @@ function MockDashboard() {
   return (
     <div className="w-full h-full flex bg-[#000814] text-white overflow-hidden font-body text-[11px] select-none text-left">
       {/* Mock Sidebar */}
-      <div className="w-[180px] hidden md:flex flex-col border-r border-[#11263b]/60 bg-[#010d1e] p-4 flex-shrink-0">
+      <div className="w-[190px] hidden md:flex flex-col border-r border-[#11263b]/60 bg-[#010d1e] p-4 flex-shrink-0">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-6 h-6 rounded-md bg-[#1c6cff] flex items-center justify-center shadow-[0_0_10px_rgba(28,108,255,0.4)]">
             <img src="/chart-donut.svg" alt="logo" className="w-3.5 h-3.5" />
           </div>
           <span className="font-display font-semibold text-sm">PocketBuddy</span>
         </div>
-        <div className="space-y-1.5 flex-1">
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#1c6cff]/10 text-[#1c6cff] font-medium">
+        <div className="space-y-1.5 flex-1 text-[10px]">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-[#1c6cff]/10 text-[#1c6cff] font-medium">
             <LayoutGrid className="w-3.5 h-3.5" /> Dashboard
           </div>
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+            <Sparkles className="w-3.5 h-3.5 text-[#a855f7]" /> Pocket Buddy AI
+          </div>
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+            <LineChart className="w-3.5 h-3.5 text-[#818cf8]" /> Transactions
+          </div>
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
             <CircleDollarSign className="w-3.5 h-3.5 text-[#00acfe]" /> Incomes
           </div>
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
             <PiggyBank className="w-3.5 h-3.5 text-[#00cc4b]" /> Budgets
           </div>
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
             <ReceiptText className="w-3.5 h-3.5 text-[#ff8833]" /> Expenses
           </div>
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
             <ScanLine className="w-3.5 h-3.5 text-cyan-400" /> Menu Scanner
           </div>
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
             <Heart className="w-3.5 h-3.5 text-tag-coral" /> Wellness Profile
+          </div>
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-fog hover:text-white hover:bg-[#001533]/30 transition-colors">
+            <Activity className="w-3.5 h-3.5 text-[#00cc4b]" /> Fitness
           </div>
         </div>
         <div className="pt-4 border-t border-[#11263b]/40 flex items-center gap-2">
@@ -101,88 +110,120 @@ function MockDashboard() {
         {/* Mock Content */}
         <div className="flex-1 p-5 overflow-y-auto space-y-4">
           {/* AI Banner */}
-          <div className="neo-card-glow p-3.5 flex items-start gap-2.5 text-left">
+          <div className="p-3.5 bg-gradient-to-r from-[#1c6cff]/15 to-[#001533]/5 border border-[#1c6cff]/20 rounded-xl flex items-start gap-2.5 text-left">
             <Sparkles className="w-3.5 h-3.5 text-[#1c6cff] shrink-0 mt-0.5 animate-pulse" />
             <div>
-              <p className="eyebrow text-[9px] mb-0.5">PocketBuddy AI Advisor</p>
+              <p className="eyebrow text-[9px] text-[#1c6cff] uppercase tracking-wider mb-0.5">POCKETBUDDY AI INSIGHT</p>
               <p className="body-thin text-fog text-[10px] leading-relaxed">
                 Your grocery spending is at <strong className="text-tag-coral font-semibold">85%</strong> of its limit. Meal prepping this week can save you up to <strong className="text-tag-lime font-semibold">$45</strong>.
               </p>
             </div>
           </div>
 
-          {/* Stat Cards */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: "Total Budget", val: "$5,200", icon: Landmark, iconColor: "text-[#1c6cff]" },
-              { label: "Total Spent", val: "$3,140", icon: Wallet, iconColor: "text-tag-coral", color: "text-tag-coral" },
-              { label: "Remaining", val: "$2,060", icon: Coins, iconColor: "text-tag-lime", color: "text-tag-lime" },
-            ].map((s) => (
-              <div key={s.label} className="p-3 bg-[#010d1e] border border-[#11263b]/50 rounded-xl flex items-center justify-between text-left">
-                <div>
-                  <p className="text-[9px] text-mist uppercase tracking-wider">{s.label}</p>
-                  <p className={`text-xs md:text-sm font-display font-bold mt-0.5 ${s.color || "text-white"}`}>{s.val}</p>
-                </div>
-                <s.icon className={`w-3.5 h-3.5 ${s.iconColor}`} />
-              </div>
-            ))}
-          </div>
-
-          {/* Grid: Charts & Budgets */}
+          {/* New 50/50 Grid: Financial Health + Status Stack */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Chart Block */}
-            <div className="p-4 bg-[#010d1e] border border-[#11263b]/50 rounded-xl flex flex-col justify-between h-[150px] text-left">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] text-mist font-semibold">Spending Activity</span>
-                <span className="text-[8px] text-[#1c6cff]">Weekly View</span>
+            {/* Left Card: Financial Health */}
+            <div className="p-4 bg-[#010d1e] border border-[#11263b]/50 rounded-xl flex flex-col justify-between h-[230px] text-left">
+              <div>
+                <p className="text-[10px] text-mist uppercase tracking-wider mb-1.5">Financial Health</p>
+                <div className="flex items-baseline gap-1.5 mb-3">
+                  <span className="text-[20px] font-bold text-white">$3,140</span>
+                  <span className="text-[10px] text-mist">spent of $5,200 budget</span>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full bg-[#11263b]/50 rounded-full h-2 overflow-hidden border border-[#11263b]/20">
+                  <div className="bg-[#1c6cff] h-2 rounded-full" style={{ width: "60%" }} />
+                </div>
+                <div className="text-[9px] text-mist mt-1.5">
+                  60% of budget used · $2,060 remaining
+                </div>
               </div>
-              <div className="flex items-end justify-between h-[90px] px-2 pt-2">
-                {[
-                  { day: "M", val: "40%" },
-                  { day: "T", val: "65%" },
-                  { day: "W", val: "30%" },
-                  { day: "T", val: "85%" },
-                  { day: "F", val: "50%" },
-                  { day: "S", val: "95%" },
-                  { day: "S", val: "20%" },
-                ].map((bar, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
-                    <div className="w-2 md:w-3 bg-[#001533] rounded-t-sm h-[60px] relative overflow-hidden flex items-end">
-                      <div
-                        className="w-full rounded-t-sm"
-                        style={{
-                          height: bar.val,
-                          background: i === 5 ? "linear-gradient(to top, #ff4433, #ff33aa)" : "linear-gradient(to top, #1c6cff, #00acfe)",
-                          boxShadow: i === 5 ? "0 0 8px rgba(255, 68, 51, 0.4)" : "0 0 8px rgba(28, 108, 255, 0.4)"
-                        }}
-                      />
+
+              {/* Stats tiles */}
+              <div className="grid grid-cols-2 gap-2 mt-auto">
+                <div className="p-2.5 rounded-lg bg-[#000814]/60 border border-[#11263b]/30 flex flex-col justify-between h-[65px]">
+                  <div className="flex justify-between items-start w-full">
+                    <span className="text-[8px] text-mist font-semibold uppercase tracking-wider">Active Budgets</span>
+                    <div className="p-1 rounded-full bg-[#11263b]/30 text-fog flex items-center justify-center w-4 h-4">
+                      <Wallet className="w-2.5 h-2.5" />
                     </div>
-                    <span className="text-[8px] text-mist">{bar.day}</span>
                   </div>
-                ))}
+                  <span className="text-sm font-bold text-white leading-none">3</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-[#000814]/60 border border-[#11263b]/30 flex flex-col justify-between h-[65px]">
+                  <div className="flex justify-between items-start w-full">
+                    <span className="text-[8px] text-mist font-semibold uppercase tracking-wider">Income Streams</span>
+                    <div className="p-1 rounded-full bg-[#1c6cff]/10 text-[#1c6cff] flex items-center justify-center w-4 h-4">
+                      <TrendingUp className="w-2.5 h-2.5" />
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold text-[#1c6cff] leading-none">$4,500</span>
+                </div>
               </div>
             </div>
 
-            {/* Budgets Block */}
-            <div className="p-4 bg-[#010d1e] border border-[#11263b]/50 rounded-xl space-y-3 text-left">
-              <span className="text-[10px] text-mist font-semibold block">Budgets Tracker</span>
-              <div className="space-y-2.5">
-                {[
-                  { label: "Groceries", val: "85%", spent: "$850", limit: "$1,000", color: "#ff4433" },
-                  { label: "Travel", val: "42%", spent: "$420", limit: "$1,000", color: "#00acfe" },
-                  { label: "Rent & Bills", val: "100%", spent: "$1,500", limit: "$1,500", color: "#00cc4b" },
-                ].map((b) => (
-                  <div key={b.label} className="text-[10px]">
-                    <div className="flex justify-between items-center mb-1 text-[9px]">
-                      <span className="text-fog font-medium">{b.label}</span>
-                      <span className="text-white font-semibold">{b.spent} / {b.limit}</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-[#001533] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: b.val, backgroundColor: b.color }} />
-                    </div>
-                  </div>
-                ))}
+            {/* Right Card: Status Stack */}
+            <div className="flex flex-col gap-3">
+              {/* Today's Status Card */}
+              <div className="p-4 bg-[#010d1e] border border-[#11263b]/50 rounded-xl flex flex-col justify-between h-[108px] text-left">
+                <div className="flex justify-between items-start w-full">
+                  <span className="text-[9px] text-mist font-semibold uppercase">TODAY'S STATUS</span>
+                  <span className="text-[8px] font-semibold uppercase bg-tag-lime/15 text-tag-lime px-1.5 py-0.5 rounded">RELAXED</span>
+                </div>
+                <p className="text-[10px] text-fog font-light leading-relaxed my-1">
+                  Today looks good — low stress supports recovery.
+                </p>
+                <div className="flex items-center gap-1 text-[8px] text-mist">
+                  <Wind className="w-3 h-3 text-signal" /> Start 4-7-8 Breathing
+                </div>
               </div>
+
+              {/* Recovery Status Card */}
+              <div className="p-4 bg-[#010d1e] border border-[#11263b]/50 rounded-xl flex flex-col justify-between h-[108px] text-left">
+                <div className="flex justify-between items-start w-full">
+                  <span className="text-[9px] text-mist font-semibold uppercase">RECOVERY STATUS</span>
+                  <span className="text-[8px] font-semibold uppercase bg-tag-lime/15 text-tag-lime px-1.5 py-0.5 rounded">ALL CLEAR</span>
+                </div>
+                <p className="text-[10px] text-fog font-light leading-relaxed my-1">
+                  No burnout pattern detected — wellness levels look stable.
+                </p>
+                <div className="text-[8px] text-[#1c6cff]">
+                  View details →
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Section */}
+          <div className="p-4 bg-[#010d1e] border border-[#11263b]/50 rounded-xl flex flex-col justify-between h-[130px] text-left">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] text-mist font-semibold">Spending Activity</span>
+              <span className="text-[8px] text-[#1c6cff]">Weekly View</span>
+            </div>
+            <div className="flex items-end justify-between h-[85px] px-2 pt-1">
+              {[
+                { day: "M", val: "40%" },
+                { day: "T", val: "65%" },
+                { day: "W", val: "30%" },
+                { day: "T", val: "85%" },
+                { day: "F", val: "50%" },
+                { day: "S", val: "95%" },
+                { day: "S", val: "20%" },
+              ].map((bar, i) => (
+                <div key={i} className="flex flex-col items-center gap-1 flex-1">
+                  <div className="w-2 md:w-2.5 bg-[#001533] rounded-t-sm h-[55px] relative overflow-hidden flex items-end">
+                    <div
+                      className="w-full rounded-t-sm"
+                      style={{
+                        height: bar.val,
+                        background: i === 5 ? "linear-gradient(to top, #ff4433, #ff33aa)" : "linear-gradient(to top, #1c6cff, #00acfe)",
+                        boxShadow: i === 5 ? "0 0 6px rgba(255, 68, 51, 0.3)" : "0 0 6px rgba(28, 108, 255, 0.3)"
+                      }}
+                    />
+                  </div>
+                  <span className="text-[8px] text-mist">{bar.day}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
