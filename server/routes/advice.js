@@ -5,11 +5,22 @@ import Transaction from "../models/Transaction.js";
 import SpendingThreshold from "../models/SpendingThreshold.js";
 
 const router = express.Router();
+const adviceCache = new Map(); // userId -> { cacheKey, advice }
+const insightsCache = new Map(); // userId -> { contextStr, insights }
 
 router.post("/", auth, async (req, res) => {
   try {
     const { totalBudget, totalIncome, totalSpend } = req.body;
+    const cacheKey = `${totalBudget}_${totalIncome}_${totalSpend}`;
+    const userId = req.user.id;
+
+    const cached = adviceCache.get(userId);
+    if (cached && cached.cacheKey === cacheKey) {
+      return res.json({ advice: cached.advice });
+    }
+
     const advice = await getFinancialAdvice(totalBudget, totalIncome, totalSpend);
+    adviceCache.set(userId, { cacheKey, advice });
     res.json({ advice });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -130,61 +141,72 @@ router.get("/insights", auth, async (req, res) => {
       subscriptions
     };
 
-    let insights = await getAIInsights(context);
+    const contextStr = JSON.stringify(context);
+    const userId = req.user.id;
+    const cached = insightsCache.get(userId);
 
-    // Fallback if AI fails or key is missing
-    if (!insights || !Array.isArray(insights)) {
-      insights = [];
-      
-      // Heuristic Rule 1: Threshold breaches
-      if (breaches.length > 0) {
-        const primaryBreach = breaches[0];
-        insights.push(`Your spending in the '${primaryBreach.category}' category has exceeded its monthly limit of ₹${primaryBreach.thresholdAmount} by ₹${primaryBreach.excess.toFixed(2)}. Consider reviewing individual transactions here.`);
-      }
+    let insights;
+    if (cached && cached.contextStr === contextStr) {
+      insights = cached.insights;
+    } else {
+      insights = await getAIInsights(context);
 
-      // Heuristic Rule 2: Cheaper alternatives or top spending
-      const CHEAPER_ALTERNATIVES = {
-        starbucks: { alternative: "local cafes or home-brewed coffee", savingPercent: 70 },
-        uber: { alternative: "public transit or bike sharing", savingPercent: 50 },
-        ola: { alternative: "public transit or bike sharing", savingPercent: 50 },
-        swiggy: { alternative: "cooking at home or local mess services", savingPercent: 60 },
-        zomato: { alternative: "cooking at home or budget restaurants", savingPercent: 60 },
-        amazon: { alternative: "comparing prices at local shops", savingPercent: 20 },
-        flipkart: { alternative: "comparing prices at local shops", savingPercent: 20 },
-      };
-
-      let alternativeSuggestionAdded = false;
-      for (const merchant of topMerchants) {
-        const lowerName = merchant.name.toLowerCase();
-        for (const [key, val] of Object.entries(CHEAPER_ALTERNATIVES)) {
-          if (lowerName.includes(key)) {
-            insights.push(`You spent ₹${merchant.amount.toFixed(2)} at ${merchant.name} this month. Swapping this for ${val.alternative} could save you up to ${val.savingPercent}% on your budget.`);
-            alternativeSuggestionAdded = true;
-            break;
-          }
+      // Fallback if AI fails or key is missing
+      if (!insights || !Array.isArray(insights)) {
+        insights = [];
+        
+        // Heuristic Rule 1: Threshold breaches
+        if (breaches.length > 0) {
+          const primaryBreach = breaches[0];
+          insights.push(`Your spending in the '${primaryBreach.category}' category has exceeded its monthly limit of ₹${primaryBreach.thresholdAmount} by ₹${primaryBreach.excess.toFixed(2)}. Consider reviewing individual transactions here.`);
         }
-        if (alternativeSuggestionAdded) break;
+
+        // Heuristic Rule 2: Cheaper alternatives or top spending
+        const CHEAPER_ALTERNATIVES = {
+          starbucks: { alternative: "local cafes or home-brewed coffee", savingPercent: 70 },
+          uber: { alternative: "public transit or bike sharing", savingPercent: 50 },
+          ola: { alternative: "public transit or bike sharing", savingPercent: 50 },
+          swiggy: { alternative: "cooking at home or local mess services", savingPercent: 60 },
+          zomato: { alternative: "cooking at home or budget restaurants", savingPercent: 60 },
+          amazon: { alternative: "comparing prices at local shops", savingPercent: 20 },
+          flipkart: { alternative: "comparing prices at local shops", savingPercent: 20 },
+        };
+
+        let alternativeSuggestionAdded = false;
+        for (const merchant of topMerchants) {
+          const lowerName = merchant.name.toLowerCase();
+          for (const [key, val] of Object.entries(CHEAPER_ALTERNATIVES)) {
+            if (lowerName.includes(key)) {
+              insights.push(`You spent ₹${merchant.amount.toFixed(2)} at ${merchant.name} this month. Swapping this for ${val.alternative} could save you up to ${val.savingPercent}% on your budget.`);
+              alternativeSuggestionAdded = true;
+              break;
+            }
+          }
+          if (alternativeSuggestionAdded) break;
+        }
+
+        if (!alternativeSuggestionAdded && topMerchants.length > 0) {
+          const topM = topMerchants[0];
+          insights.push(`Your highest spending merchant this month is ${topM.name} with a total of ₹${topM.amount.toFixed(2)}. Setting a cooling-off limit before purchasing can prevent impulse spending.`);
+        }
+
+        // Heuristic Rule 3: Subscriptions
+        if (subscriptions.length > 0) {
+          const sub = subscriptions[0];
+          insights.push(`We identified a recurring monthly charge of ₹${sub.amount.toFixed(2)} at ${sub.merchantName}. Make sure you are actively using this subscription or cancel to save money.`);
+        }
+
+        // Fill in remaining bullets to ensure exactly 3 elements
+        if (insights.length < 3) {
+          insights.push("Try dividing your budget using the 50-30-20 rule (50% needs, 30% wants, 20% savings) adapted for a student lifestyle.");
+        }
+        if (insights.length < 3) {
+          insights.push("Building an emergency fund of 3-6 months' expenses will provide a financial safety net for unexpected school or personal costs.");
+        }
+        insights = insights.slice(0, 3);
       }
 
-      if (!alternativeSuggestionAdded && topMerchants.length > 0) {
-        const topM = topMerchants[0];
-        insights.push(`Your highest spending merchant this month is ${topM.name} with a total of ₹${topM.amount.toFixed(2)}. Setting a cooling-off limit before purchasing can prevent impulse spending.`);
-      }
-
-      // Heuristic Rule 3: Subscriptions
-      if (subscriptions.length > 0) {
-        const sub = subscriptions[0];
-        insights.push(`We identified a recurring monthly charge of ₹${sub.amount.toFixed(2)} at ${sub.merchantName}. Make sure you are actively using this subscription or cancel to save money.`);
-      }
-
-      // Fill in remaining bullets to ensure exactly 3 elements
-      if (insights.length < 3) {
-        insights.push("Try dividing your budget using the 50-30-20 rule (50% needs, 30% wants, 20% savings) adapted for a student lifestyle.");
-      }
-      if (insights.length < 3) {
-        insights.push("Building an emergency fund of 3-6 months' expenses will provide a financial safety net for unexpected school or personal costs.");
-      }
-      insights = insights.slice(0, 3);
+      insightsCache.set(userId, { contextStr, insights });
     }
 
     res.json({
