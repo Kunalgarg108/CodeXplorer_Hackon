@@ -2,15 +2,16 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useCurrency } from "@/context/CurrencyContext";
+import { Coffee, Car, Utensils, Package, ShoppingBag, RotateCw, Lightbulb, AlertTriangle } from "lucide-react";
 
 const CHEAPER_ALTERNATIVES = {
-  starbucks: { alternative: "local cafes or home-brewed coffee", savingPercent: 70, icon: "☕" },
-  uber: { alternative: "public transit, carpooling, or bike sharing", savingPercent: 50, icon: "🚗" },
-  ola: { alternative: "public transit or local auto/cab options", savingPercent: 50, icon: "🛺" },
-  swiggy: { alternative: "cooking at home or enrolling in local mess service", savingPercent: 60, icon: "🍕" },
-  zomato: { alternative: "cooking at home or dining in budget local eateries", savingPercent: 60, icon: "🍔" },
-  amazon: { alternative: "comparing prices in local markets or waiting for holiday sales", savingPercent: 20, icon: "📦" },
-  flipkart: { alternative: "comparing prices on local stores", savingPercent: 20, icon: "🛍️" },
+  starbucks: { alternative: "local cafes or home-brewed coffee", savingPercent: 70, icon: Coffee },
+  uber: { alternative: "public transit, carpooling, or bike sharing", savingPercent: 50, icon: Car },
+  ola: { alternative: "public transit or local auto/cab options", savingPercent: 50, icon: Car },
+  swiggy: { alternative: "cooking at home or enrolling in local mess service", savingPercent: 60, icon: Utensils },
+  zomato: { alternative: "cooking at home or dining in budget local eateries", savingPercent: 60, icon: Utensils },
+  amazon: { alternative: "comparing prices in local markets or waiting for holiday sales", savingPercent: 20, icon: Package },
+  flipkart: { alternative: "comparing prices on local stores", savingPercent: 20, icon: ShoppingBag },
 };
 
 export function InsightCards() {
@@ -121,7 +122,7 @@ export function InsightCards() {
         <div className="neo-card bg-[#010d1e] border-steel/30 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-white flex items-center gap-2 font-display">
-              <span>🔄</span> Detected Subscriptions
+              <RotateCw className="w-5 h-5 text-[#1c6cff]" /> Detected Subscriptions
             </h2>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#1c6cff]/15 text-[#1c6cff] border border-[#1c6cff]/30 uppercase tracking-wider">
               {subscriptions.length} Found
@@ -166,7 +167,7 @@ export function InsightCards() {
                 );
               })}
               <div className="p-3 bg-[#1c6cff]/10 text-[#1c6cff] text-xs rounded-xl mt-3 flex items-start gap-2 border border-[#1c6cff]/20">
-                <span>💡</span>
+                <Lightbulb className="w-4 h-4 text-[#1c6cff] shrink-0 mt-0.5" />
                 <span>
                   <strong>Tip:</strong> Subscriptions consume student budgets quietly. Audit these recurring fees and pause anything you don't use daily.
                 </span>
@@ -178,7 +179,7 @@ export function InsightCards() {
         {/* 3. Alternative Merchant Swaps */}
         <div className="neo-card bg-[#010d1e] border-steel/30 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-6 font-display">
-            <span>💡</span> Budget Hacks & Alternatives
+            <Lightbulb className="w-5 h-5 text-[#00cc4b]" /> Budget Hacks & Alternatives
           </h2>
 
           {alternativeSuggestions.length === 0 ? (
@@ -188,28 +189,31 @@ export function InsightCards() {
             </div>
           ) : (
             <div className="space-y-4">
-              {alternativeSuggestions.map((swap, i) => (
-                <div
-                  key={i}
-                  className="p-4 rounded-xl border border-[#00cc4b]/20 bg-[#00cc4b]/5 flex items-start gap-4 hover:border-[#00cc4b]/40 transition duration-150"
-                >
-                  <span className="text-2xl p-2 bg-[#00cc4b]/10 rounded-xl flex-shrink-0">
-                    {swap.icon}
-                  </span>
-                  <div className="space-y-1 flex-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-white text-sm">{swap.merchantName} Swap</h3>
-                      <span className="text-[10px] font-bold text-[#00cc4b] bg-[#00cc4b]/20 px-2 py-0.5 rounded-full border border-[#00cc4b]/30 uppercase tracking-wider">
-                        Save {swap.savingPercent}%
-                      </span>
+              {alternativeSuggestions.map((swap, i) => {
+                const SwapIcon = swap.icon;
+                return (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl border border-[#00cc4b]/20 bg-[#00cc4b]/5 flex items-start gap-4 hover:border-[#00cc4b]/40 transition duration-150"
+                  >
+                    <span className="p-2.5 bg-[#00cc4b]/10 rounded-xl flex-shrink-0 text-[#00cc4b]">
+                      {SwapIcon && <SwapIcon className="w-6 h-6" />}
+                    </span>
+                    <div className="space-y-1 flex-1">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-bold text-white text-sm">{swap.merchantName} Swap</h3>
+                        <span className="text-[10px] font-bold text-[#00cc4b] bg-[#00cc4b]/20 px-2 py-0.5 rounded-full border border-[#00cc4b]/30 uppercase tracking-wider">
+                          Save {swap.savingPercent}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-fog leading-relaxed">
+                        Spent: <span className="font-semibold text-white">{format(swap.spent)}</span>. 
+                        Switching to <span className="font-semibold text-[#00cc4b]">{swap.alternative}</span> could save you up to <span className="font-bold text-[#00cc4b]">{format(swap.potentialSaving)}</span> this month!
+                      </p>
                     </div>
-                    <p className="text-xs text-fog leading-relaxed">
-                      Spent: <span className="font-semibold text-white">{format(swap.spent)}</span>. 
-                      Switching to <span className="font-semibold text-[#00cc4b]">{swap.alternative}</span> could save you up to <span className="font-bold text-[#00cc4b]">{format(swap.potentialSaving)}</span> this month!
-                    </p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -219,7 +223,7 @@ export function InsightCards() {
       {breaches.length > 0 && (
         <div className="bg-[#ff4433]/5 border border-[#ff4433]/30 rounded-2xl p-6">
           <h3 className="text-base font-bold text-[#ff4433] mb-4 flex items-center gap-2 font-display">
-            <span>🚨</span> Limit Breach Warnings
+            <AlertTriangle className="w-5 h-5 text-[#ff4433]" /> Limit Breach Warnings
           </h3>
           <div className="space-y-3">
             {breaches.map((breach, index) => (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Lock, FileSpreadsheet } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -154,8 +155,9 @@ export function BankStatementUpload({ onSuccess }) {
 
           {passwordRequired ? (
             <div className="space-y-4">
-              <div className="text-sm text-yellow-600 bg-yellow-50/10 border border-yellow-500/20 p-3 rounded-xl">
-                🔒 This bank statement spreadsheet is password protected. Please enter the password to decrypt and parse it.
+              <div className="text-sm text-yellow-600 bg-yellow-50/10 border border-yellow-500/20 p-3 rounded-xl flex items-start gap-2">
+                <Lock className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
+                <span>This bank statement spreadsheet is password protected. Please enter the password to decrypt and parse it.</span>
               </div>
               {passwordError && (
                 <div className="text-sm text-[#ff4433] bg-[#ff4433]/10 border border-[#ff4433]/20 p-2 rounded-xl">
@@ -216,7 +218,7 @@ export function BankStatementUpload({ onSuccess }) {
                 <div className="border-2 border-dashed border-[#11263b] hover:border-[#1c6cff]/50 rounded-2xl p-8 text-center bg-[#010d1e]/20 transition-all">
                   <label className="cursor-pointer">
                     <div className="space-y-2">
-                      <div className="text-3xl">📊</div>
+                      <div className="flex justify-center mb-1 text-primary"><FileSpreadsheet className="w-10 h-10" /></div>
                       <div className="text-sm font-medium text-paper">
                         Click to upload Excel / CSV
                       </div>
