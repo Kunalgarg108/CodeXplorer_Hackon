@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { useCurrency } from "@/context/CurrencyContext";
 
 export default function CardInfo({ budgetList, incomeList, onlyAdvice, onlyCards }) {
-  const { format } = useCurrency();
+  const { currency, format } = useCurrency();
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpend, setTotalSpend] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
@@ -32,11 +32,11 @@ export default function CardInfo({ budgetList, incomeList, onlyAdvice, onlyCards
     if (onlyCards) return; // Prevent duplicate advice API calls in cards-only instances
 
     if (totalBudget > 0 || totalIncome > 0 || totalSpend > 0) {
-      api.getAdvice({ totalBudget, totalIncome, totalSpend })
+      api.getAdvice({ totalBudget, totalIncome, totalSpend, currency })
         .then((data) => setFinancialAdvice(data.advice))
         .catch(() => setFinancialAdvice("Unable to load financial advice."));
     }
-  }, [totalBudget, totalIncome, totalSpend, onlyCards]);
+  }, [totalBudget, totalIncome, totalSpend, onlyCards, currency]);
 
   const statCards = [
     { label: "Total Budget", value: format(totalBudget), icon: PiggyBank },

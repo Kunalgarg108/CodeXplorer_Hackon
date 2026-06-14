@@ -3,6 +3,7 @@ import Budget from "../models/Budget.js";
 import Expense from "../models/Expense.js";
 import { auth } from "../middleware/auth.js";
 import generateAlertsWithAI from "../utils/getBudgetAlerts.js";
+import { getExchangeRates, getCurrencySymbol } from "../services/currencyService.js";
 
 const router = express.Router();
 
@@ -10,6 +11,11 @@ const alertsCache = new Map(); // userId -> { cacheKey, alerts }
 
 router.get("/", auth, async (req, res) => {
   try {
+    const currencyCode = req.query.currency || "USD";
+    const { rates } = getExchangeRates();
+    const rate = rates[currencyCode] || 1;
+    const symbol = getCurrencySymbol(currencyCode);
+
     const budgets = await Budget.find({ createdBy: req.user.email });
 
     if (budgets.length === 0) {
@@ -63,16 +69,16 @@ router.get("/", auth, async (req, res) => {
       // Recent expenses (last 5)
       const recentExpenses = budgetExpenses.slice(0, 5).map((e) => ({
         name: e.name,
-        amount: e.amount,
+        amount: Math.round(e.amount * rate * 100) / 100,
       }));
 
       return {
         name: budget.name,
         icon: budget.icon,
-        amount,
-        totalSpend,
+        amount: Math.round(amount * rate * 100) / 100,
+        totalSpend: Math.round(totalSpend * rate * 100) / 100,
         utilizationPercent,
-        burnRate: Math.round(burnRate * 100) / 100,
+        burnRate: Math.round(burnRate * rate * 100) / 100,
         daysActive,
         daysUntilExhaustion: daysUntilExhaustion !== null ? Math.round(daysUntilExhaustion) : null,
         weeklyTrend,
@@ -87,14 +93,14 @@ router.get("/", auth, async (req, res) => {
       return res.json({ alerts: [], budgetSummaries });
     }
 
-    const cacheKey = JSON.stringify(activeBudgets);
+    const cacheKey = `${currencyCode}_${JSON.stringify(activeBudgets)}`;
     const userId = req.user.id;
     const cached = alertsCache.get(userId);
     let alerts;
     if (cached && cached.cacheKey === cacheKey) {
       alerts = cached.alerts;
     } else {
-      alerts = await generateAlertsWithAI(activeBudgets);
+      alerts = await generateAlertsWithAI(activeBudgets, symbol);
       alertsCache.set(userId, { cacheKey, alerts });
     }
 

@@ -56,7 +56,7 @@ export function getFallbackAnalysis(today, wellnessState, history) {
   return { todayText, recoveryText, suggestedAction, weeklyTrendLabel: computeEWMATrend(history) };
 }
 
-const getBurnoutAnalysis = async (profile, financeData, wellnessState) => {
+const getBurnoutAnalysis = async (profile, financeData, wellnessState, symbol = "$") => {
   const checkins = profile.dailyCheckins || [];
   const todayStr = new Date().toDateString();
   const today = checkins.find(c => new Date(c.date).toDateString() === todayStr);
@@ -83,7 +83,7 @@ const getBurnoutAnalysis = async (profile, financeData, wellnessState) => {
 
 Profile: Semester ${semester}, Exam in ${daysUntilExam}, Sleep ${sleepHours}hrs, Study ${studyHours}hrs/day, Job: ${hasJob ? "Yes" : "No"}
 Burnout State: ${wellnessState.burnoutState}, Recovery: ${wellnessState.recoveryDaysCompleted}/${wellnessState.recoveryDaysRequired} days
-Spending: Total $${totalSpend.toFixed(0)}, Food $${totalFoodBudgetSpend.toFixed(0)}, Coping $${copingSpend.toFixed(0)}
+Spending: Total ${symbol}${totalSpend.toFixed(0)}, Food ${symbol}${totalFoodBudgetSpend.toFixed(0)}, Coping ${symbol}${copingSpend.toFixed(0)}
 
 Recent Check-ins:
 ${recentCheckinsText || "None"}
