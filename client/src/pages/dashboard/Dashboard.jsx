@@ -172,7 +172,7 @@ export default function Dashboard() {
           </div>
           <div className="space-y-1">
             <span className="text-[11px] font-semibold text-signal uppercase tracking-[0.08em] block">
-              FINANSMART AI INSIGHT
+              POCKETBUDDY AI INSIGHT
             </span>
             <p className="text-[14px] leading-[1.6] text-fog font-light">
               {financialAdvice}

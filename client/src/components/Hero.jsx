@@ -54,7 +54,7 @@ function MockDashboard() {
           <div className="w-6 h-6 rounded-md bg-[#1c6cff] flex items-center justify-center shadow-[0_0_10px_rgba(28,108,255,0.4)]">
             <img src="/chart-donut.svg" alt="logo" className="w-3.5 h-3.5" />
           </div>
-          <span className="font-display font-semibold text-sm">FinanSmart</span>
+          <span className="font-display font-semibold text-sm">PocketBuddy</span>
         </div>
         <div className="space-y-1.5 flex-1">
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#1c6cff]/10 text-[#1c6cff] font-medium">
@@ -104,7 +104,7 @@ function MockDashboard() {
           <div className="neo-card-glow p-3.5 flex items-start gap-2.5 text-left">
             <Sparkles className="w-3.5 h-3.5 text-[#1c6cff] shrink-0 mt-0.5 animate-pulse" />
             <div>
-              <p className="eyebrow text-[9px] mb-0.5">FinanSmart AI Advisor</p>
+              <p className="eyebrow text-[9px] mb-0.5">PocketBuddy AI Advisor</p>
               <p className="body-thin text-fog text-[10px] leading-relaxed">
                 Your grocery spending is at <strong className="text-tag-coral font-semibold">85%</strong> of its limit. Meal prepping this week can save you up to <strong className="text-tag-lime font-semibold">$45</strong>.
               </p>
@@ -288,7 +288,7 @@ function FeatureCard({ icon: Icon, title, desc, accent, index }) {
 const STEPS = [
   { n: "01", title: "Create your budgets", desc: "Set spending limits for every category — groceries, travel, dining, health — with a fun emoji pick.", color: "#1c6cff" },
   { n: "02", title: "Log income & expenses", desc: "Add income streams and expenses in seconds. Every transaction is instantly reflected in your charts.", color: "#00cc4b" },
-  { n: "03", title: "Get AI insights",       desc: "FinanSmart AI reads your numbers and gives you plain-English advice on where to save and what to cut.", color: "#ff8833" },
+  { n: "03", title: "Get AI insights",       desc: "PocketBuddy AI reads your numbers and gives you plain-English advice on where to save and what to cut.", color: "#ff8833" },
 ];
 
 function StepCard({ n, title, desc, color, index }) {
@@ -760,7 +760,7 @@ function SectionCTA() {
           <span style={{ color: "#1c6cff" }}>a midnight canvas.</span>
         </h2>
         <p style={{ color: "#ccced0", fontSize: 15, fontWeight: 300, lineHeight: 1.65, marginBottom: 36 }}>
-          Join FinanSmart and take control of every dollar — with AI clarity, not just spreadsheets.
+          Join PocketBuddy and take control of every dollar — with AI clarity, not just spreadsheets.
         </p>
         <Link to="/sign-up">
           <Button size="lg" style={{ fontSize: 16, padding: "16px 40px", borderRadius: 14 }}>
