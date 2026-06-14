@@ -468,19 +468,15 @@ export default function Hero() {
                   marginBottom: 32,
                 }}
               >
-                <Link to="/sign-up">
-                  <Button size="lg" style={{ fontSize: 15, padding: "14px 32px", borderRadius: 14 }}>
+                <Link to="/sign-up" style={{ textDecoration: "none" }}>
+                  <button className="bg-[#1c6cff] hover:bg-[#0052e0] text-white font-semibold text-[15px] px-8 py-3.5 rounded-[14px] shadow-[0_8px_30px_rgba(28,108,255,0.4)] hover:shadow-[0_12px_35px_rgba(28,108,255,0.6)] hover:scale-[1.03] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-300 border-none outline-none cursor-pointer">
                     Get started — it's free →
-                  </Button>
+                  </button>
                 </Link>
-                <Link to="/sign-in">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    style={{ fontSize: 15, padding: "14px 28px", borderRadius: 14 }}
-                  >
+                <Link to="/sign-in" style={{ textDecoration: "none" }}>
+                  <button className="bg-white/5 border border-white/10 hover:border-white/30 text-[#ccced0] hover:text-white font-medium text-[15px] px-8 py-3.5 rounded-[14px] hover:bg-white/10 hover:scale-[1.03] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-300 outline-none cursor-pointer">
                     Log in
-                  </Button>
+                  </button>
                 </Link>
               </div>
             </div>
@@ -803,10 +799,10 @@ function SectionCTA() {
         <p style={{ color: "#ccced0", fontSize: 15, fontWeight: 300, lineHeight: 1.65, marginBottom: 36 }}>
           Join PocketBuddy and take control of every dollar — with AI clarity, not just spreadsheets.
         </p>
-        <Link to="/sign-up">
-          <Button size="lg" style={{ fontSize: 16, padding: "16px 40px", borderRadius: 14 }}>
+        <Link to="/sign-up" style={{ textDecoration: "none" }}>
+          <button className="bg-[#1c6cff] hover:bg-[#0052e0] text-white font-semibold text-[15px] px-8 py-3.5 rounded-[14px] shadow-[0_8px_30px_rgba(28,108,255,0.4)] hover:shadow-[0_12px_35px_rgba(28,108,255,0.6)] hover:scale-[1.03] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-300 border-none outline-none cursor-pointer">
             Get started for free →
-          </Button>
+          </button>
         </Link>
       </div>
     </section>
