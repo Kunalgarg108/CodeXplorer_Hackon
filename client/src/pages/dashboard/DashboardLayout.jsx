@@ -53,12 +53,12 @@ export default function DashboardLayout() {
 
   const SidebarContent = () => (
     <>
-      <div className="flex items-center gap-3 mb-8 shrink-0">
+      <Link to="/" className="flex items-center gap-3 mb-8 shrink-0 hover:opacity-85 transition-opacity">
         <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
           <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
         </div>
         <span className="font-display font-medium text-paper text-lg">PocketBuddy</span>
-      </div>
+      </Link>
 
       <nav className="flex-1 overflow-y-auto sidebar-scroll pr-1">
         {menuList.map((menu, index) => (
@@ -125,7 +125,7 @@ export default function DashboardLayout() {
         >
           <Menu className="w-6 h-6 text-white" />
         </button>
-        <span className="font-display font-medium text-paper text-base">PocketBuddy</span>
+        <Link to="/" className="font-display font-medium text-paper text-base hover:opacity-85 transition-opacity">PocketBuddy</Link>
       </div>
 
       {/* Mobile Overlay */}
