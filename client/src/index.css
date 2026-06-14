@@ -281,3 +281,16 @@
     background: linear-gradient(90deg, transparent, rgba(17,38,59,0.8), transparent);
   }
 }
+
+/* Autofill override to prevent white/yellow browser autofill backgrounds in dark mode inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 0 100px #001533 !important; /* matches bg-indigo/40 shade */
+  border: 1px solid rgba(17,38,59,0.5) !important;
+}
+

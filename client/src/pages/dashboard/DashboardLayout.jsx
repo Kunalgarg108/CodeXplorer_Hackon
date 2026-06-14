@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutGrid, PiggyBank, ReceiptText, CircleDollarSign, ScanLine,
-  Heart, Sparkles, Activity,
+  Heart, Sparkles, Activity,LineChart
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 
 const menuList = [
   { name: "Dashboard", icon: LayoutGrid, path: "/dashboard", colorClass: "text-[#1c6cff]" },
+  { name: "Pocket Buddy AI", icon: Sparkles, path: "/dashboard/pocket-buddy", colorClass: "text-[#a855f7]" },
+  { name: "Transactions", icon: LineChart, path: "/dashboard/transactions", colorClass: "text-[#818cf8]" },
   { name: "Incomes", icon: CircleDollarSign, path: "/dashboard/incomes", colorClass: "text-[#00acfe]" },
   { name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets", colorClass: "text-[#00cc4b]" },
   { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses", colorClass: "text-[#ff8833]" },
-  { name: "Pocket Buddy AI", icon: Sparkles, path: "/dashboard/pocket-buddy", colorClass: "text-[#a855f7]" },
+  
   { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner", colorClass: "text-cyan-400" },
   { name: "Fitness", icon: Activity, path: "/dashboard/fitness", colorClass: "text-[#00cc4b]" },
   { name: "Wellness Profile", icon: Heart, path: "/dashboard/wellness", colorClass: "text-tag-coral" },

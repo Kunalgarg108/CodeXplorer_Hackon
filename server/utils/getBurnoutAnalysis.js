@@ -140,9 +140,11 @@ const fallbackBurnoutAnalysis = (profile, financeData, burnoutInfo) => {
   return { riskLevel, reason, tip, source: "Quick Analysis" };
 };
 
+const isPlaceholderKey = (key) => !key || key.trim() === "" || key.startsWith("your-") || key.includes("placeholder");
+
 const getBurnoutAnalysis = async (profile, financeData, burnoutInfo) => {
-  const openRouterKey = process.env.OPENROUTER_API_KEY;
-  const openAIKey = process.env.OPENAI_API_KEY;
+  const openRouterKey = isPlaceholderKey(process.env.OPENROUTER_API_KEY) ? null : process.env.OPENROUTER_API_KEY;
+  const openAIKey = isPlaceholderKey(process.env.OPENAI_API_KEY) ? null : process.env.OPENAI_API_KEY;
   
   let openai = null;
   let modelName = "gpt-4o-mini";
