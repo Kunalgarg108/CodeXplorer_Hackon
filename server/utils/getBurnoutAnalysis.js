@@ -1,269 +1,110 @@
-import OpenAI from "openai";
+import { chatCompletion, isAIConfigured } from "./aiClient.js";
 
-const fallbackBurnoutAnalysis = (profile, financeData, burnoutInfo) => {
-  let riskLevel = "Low";
-  let reason = "Your lifestyle and spending metrics look stable and balanced.";
-  let tip = "Keep up the good habits! Try to maintain a regular sleep schedule.";
-
-  const {
-    semester = null,
-    examDate = null,
-    sleepHours = 6,
-    stressEatingPattern = ["Eat less/skip meals"],
-    cravingType = [],
-    stressLevel = 3,
-    studyHours = 6,
-    hasJob = false,
-    dailyCheckins = []
-  } = profile;
-
-  const {
-    totalFoodBudgetLimit = 0,
-    totalFoodBudgetSpend = 0,
-    copingSpend = 0,
-    examWindowSpend = 0,
-    totalSpend = 0
-  } = financeData || {};
-
-  const {
-    burnoutPhase = false,
-    maxConsecutiveStressDays = 0
-  } = burnoutInfo || {};
-
-  // Calculate days until exam
-  let daysUntilExam = null;
-  if (examDate) {
-    const diffTime = new Date(examDate) - new Date();
-    daysUntilExam = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+export function computeEWMATrend(history) {
+  if (!history || history.length < 2) return "Stable";
+  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const checkins = sorted.slice(-7);
+  if (checkins.length < 2) return "Stable";
+  const alpha = 0.3;
+  let ewma = checkins[0].stressLevel;
+  let prevEwma = ewma;
+  for (let i = 1; i < checkins.length; i++) {
+    prevEwma = ewma;
+    ewma = alpha * checkins[i].stressLevel + (1 - alpha) * ewma;
   }
+  const diff = ewma - prevEwma;
+  if (diff < -0.15) return "Improving";
+  if (diff > 0.15) return "Worsening";
+  return "Stable";
+}
 
-  // Evaluate daily checkins (rolling last 7 check-ins)
-  let rollingSleepAvg = sleepHours;
-  let skippedMealsCount = 0;
-  let bingedCount = 0;
-  let dailyStressAvg = stressLevel;
-
-  if (dailyCheckins && dailyCheckins.length > 0) {
-    const recent = dailyCheckins.slice(-7);
-    let totalSleep = 0;
-    let totalStress = 0;
-    recent.forEach(c => {
-      totalSleep += c.sleepHours;
-      totalStress += c.stressLevel;
-      if (c.eatingPattern === "Skipped meals") skippedMealsCount++;
-      if (c.eatingPattern === "Binged") bingedCount++;
-    });
-    rollingSleepAvg = Number((totalSleep / recent.length).toFixed(1));
-    dailyStressAvg = Number((totalStress / recent.length).toFixed(1));
-  }
-
-  // Calculate risk score based on inputs + checkins + finances
-  let score = 0;
-
-  // Sleep factor
-  if (rollingSleepAvg < 5) score += 3.5;
-  else if (rollingSleepAvg < 6.5) score += 1.5;
-
-  // Stress Level factor
-  if (dailyStressAvg >= 4) score += 3;
-  else if (dailyStressAvg >= 3) score += 1;
-
-  // Study hours factor
-  if (studyHours > 9) score += 2;
-  else if (studyHours > 6) score += 1;
-
-  // Job pressure
-  if (hasJob) score += 1.5;
-
-  // Exam pressure
-  if (daysUntilExam !== null && daysUntilExam >= 0 && daysUntilExam <= 7) {
-    score += 2;
-  }
-
-  // Stress eating check-in flags
-  if (skippedMealsCount >= 2) score += 2;
-  if (bingedCount >= 2) score += 1.5;
-
-  // Financial coping factors
-  if (copingSpend > 100) score += 2; // high junk food/delivery/shopping coping spend
-  else if (copingSpend > 40) score += 1;
-
-  // Food budget overrun
-  if (totalFoodBudgetLimit > 0 && totalFoodBudgetSpend > totalFoodBudgetLimit) {
-    score += 1.5;
-  }
-
-  // Stress spending spike near exams
-  if (examWindowSpend > 80) {
-    score += 1;
-  }
-
-  // Burnout phase factor (chronic high stress)
-  if (burnoutPhase) {
-    score += 6; // Enforce high risk category
-  }
-
-  // Classify risk
-  if (score >= 8 || burnoutPhase) {
-    riskLevel = "High";
-    if (burnoutPhase) {
-      reason = `Chronic burnout phase active: High stress levels (>= 4/5) sustained for ${maxConsecutiveStressDays} consecutive check-ins.`;
-      tip = "Take a step back and practice the 4-7-8 guided breathing exercise using the pulsing red alert banner on your dashboard.";
-    } else if (rollingSleepAvg < 5.5) {
-      reason = `Rolling sleep average is dangerously low (${rollingSleepAvg} hrs) combined with high stress and academic load.`;
-      tip = "Prioritize sleep immediately. Set a strict boundary for study hours and turn off devices by 10 PM.";
-    } else if (skippedMealsCount >= 2 || (totalFoodBudgetLimit > 0 && totalFoodBudgetSpend > totalFoodBudgetLimit)) {
-      reason = `Frequent skipped meals (${skippedMealsCount} times this week) and overspending on food suggest coping issues.`;
-      tip = "Schedule regular meal slots in your calendar and allocate a portion of your budget specifically to cheap, healthy home ingredients.";
-    } else {
-      reason = `Excessive study hours (${studyHours} hrs/day) and a part-time job under high stress rating are causing exhaustion.`;
-      tip = "Take a full 'zero-work' rest day. Clear boundaries between study, work, and personal space are vital.";
-    }
-  } else if (score >= 4.5) {
-    riskLevel = "Moderate";
-    if (copingSpend > 60 || bingedCount >= 1) {
-      reason = `Moderate stress with elevated food-delivery/coping spend ($${copingSpend.toFixed(2)}) and emotional eating signs.`;
-      tip = "Try swapping food-delivery orders with easy-to-cook comfort meals to save money and eat healthier.";
-    } else if (daysUntilExam !== null && daysUntilExam <= 7) {
-      reason = `Exam approaching in ${daysUntilExam} days. Stress is moderate, affecting sleep averages (${rollingSleepAvg} hrs).`;
-      tip = "Structure your revision topics into small chunks and test yourself early to gain confidence.";
-    } else {
-      reason = `Academics, work, and sleep levels (${rollingSleepAvg} hrs) are causing moderate fatigue.`;
-      tip = "Try running or walking outdoors for 20 minutes daily to break up coding and study cycles.";
-    }
+export function getFallbackAnalysis(today, wellnessState, history) {
+  let todayText = "";
+  if (!today) {
+    todayText = "No check-in logged for today. Submit a check-in to view metrics.";
+  } else if (today.stressLevel <= 2) {
+    todayText = "Today looks good — low stress supports recovery.";
+  } else if (today.stressLevel >= 4) {
+    todayText = "Today shows elevated stress. Consider a short break or breathing exercise.";
   } else {
-    riskLevel = "Low";
-    reason = "Your sleep, stress check-ins, and financial habits look stable and sustainable.";
-    tip = "Great job! Keep monitoring your budget limits and maintain a consistent sleep routine.";
+    todayText = "Today is moderate — keep an eye on sleep and stress levels.";
   }
 
-  return { riskLevel, reason, tip, source: "Quick Analysis" };
-};
-
-const isPlaceholderKey = (key) => !key || key.trim() === "" || key.startsWith("your-") || key.includes("placeholder");
-
-const getBurnoutAnalysis = async (profile, financeData, burnoutInfo) => {
-  const openRouterKey = isPlaceholderKey(process.env.OPENROUTER_API_KEY) ? null : process.env.OPENROUTER_API_KEY;
-  const openAIKey = isPlaceholderKey(process.env.OPENAI_API_KEY) ? null : process.env.OPENAI_API_KEY;
-  
-  let openai = null;
-  let modelName = "gpt-4o-mini";
-
-  const isOrKey = (key) => key && key.startsWith("sk-or-v1-");
-
-  if (openRouterKey || isOrKey(openAIKey)) {
-    openai = new OpenAI({
-      apiKey: openRouterKey || openAIKey,
-      baseURL: "https://openrouter.ai/api/v1",
-      dangerouslyAllowBrowser: true
-    });
-    modelName = "google/gemini-2.5-flash";
-  } else if (openAIKey) {
-    openai = new OpenAI({
-      apiKey: openAIKey
-    });
+  let triggerDateStr = wellnessState.triggerDate ? new Date(wellnessState.triggerDate).toLocaleDateString() : "recently";
+  let recoveryText = "";
+  if (wellnessState.burnoutState === "chronic") {
+    recoveryText = `Chronic burnout flagged on ${triggerDateStr}. Focus on consistent sleep and stress reduction.`;
+  } else if (wellnessState.burnoutState === "recovering") {
+    const remaining = Math.max(0, (wellnessState.recoveryDaysRequired || 3) - (wellnessState.recoveryDaysCompleted || 0));
+    recoveryText = `Recovering from high stress. ${wellnessState.recoveryDaysCompleted || 0}/${wellnessState.recoveryDaysRequired || 3} healthy days — ${remaining} more to recover.`;
+  } else if (wellnessState.burnoutState === "warning") {
+    recoveryText = "Stress has been elevated. Watch for a developing pattern.";
+  } else {
+    recoveryText = "No burnout pattern detected — wellness levels look stable.";
   }
 
-  if (!openai) {
-    return fallbackBurnoutAnalysis(profile, financeData, burnoutInfo);
+  let suggestedAction = "";
+  if (wellnessState.burnoutState === "recovering") {
+    const remaining = Math.max(0, (wellnessState.recoveryDaysRequired || 3) - (wellnessState.recoveryDaysCompleted || 0));
+    suggestedAction = `Keep going — ${remaining} more healthy day(s) and recovery is complete.`;
+  } else if (today && today.stressLevel <= 2) {
+    suggestedAction = "Try the 4-7-8 breathing exercise to maintain this calm state.";
+  } else {
+    suggestedAction = "Prioritize 7-8 hours of sleep tonight and avoid stress-eating triggers.";
+  }
+
+  return { todayText, recoveryText, suggestedAction, weeklyTrendLabel: computeEWMATrend(history) };
+}
+
+const getBurnoutAnalysis = async (profile, financeData, wellnessState) => {
+  const checkins = profile.dailyCheckins || [];
+  const todayStr = new Date().toDateString();
+  const today = checkins.find(c => new Date(c.date).toDateString() === todayStr);
+
+  if (!isAIConfigured()) {
+    return { ...getFallbackAnalysis(today, wellnessState, checkins), source: "Quick Analysis" };
   }
 
   try {
-    const {
-      semester = "unknown",
-      examDate = "No exams scheduled",
-      sleepHours = 6,
-      stressEatingPattern = ["Eat less/skip meals"],
-      cravingType = [],
-      stressLevel = 3,
-      studyHours = 6,
-      hasJob = false,
-      dailyCheckins = []
-    } = profile;
-
-    const {
-      totalFoodBudgetLimit = 0,
-      totalFoodBudgetSpend = 0,
-      copingSpend = 0,
-      examWindowSpend = 0,
-      totalSpend = 0
-    } = financeData || {};
-
-    const {
-      burnoutPhase = false,
-      maxConsecutiveStressDays = 0
-    } = burnoutInfo || {};
+    const { semester = "unknown", examDate = "No exams scheduled", sleepHours = 6, stressEatingPattern = [], studyHours = 6, hasJob = false } = profile;
+    const { totalFoodBudgetSpend = 0, copingSpend = 0, totalSpend = 0 } = financeData || {};
 
     let daysUntilExam = "No exams scheduled";
     if (examDate && examDate !== "No exams scheduled") {
-      const diffTime = new Date(examDate) - new Date();
-      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const days = Math.ceil((new Date(examDate) - new Date()) / (1000 * 60 * 60 * 24));
       daysUntilExam = days >= 0 ? `${days} days` : "passed";
     }
 
-    // Prepare recent daily checkins overview
-    const recentCheckinsText = dailyCheckins.slice(-7).map(c => 
-      `Date: ${new Date(c.date).toDateString()}, Sleep: ${c.sleepHours} hrs, Eating: ${c.eatingPattern}, Stress: ${c.stressLevel}/5`
+    const recentCheckinsText = checkins.slice(-7).map(c =>
+      `${new Date(c.date).toDateString()}: Sleep ${c.sleepHours}hrs, Eating: ${c.eatingPattern}, Stress: ${c.stressLevel}/5`
     ).join("\n");
 
-    const userPrompt = `
-      You are an AI wellness companion for college students. Analyze their burnout risk based on the following profile and financial transactions:
+    const userPrompt = `You are an AI wellness companion. Analyze burnout risk:
 
-      Student Profile:
-      - Semester/Year: ${semester}
-      - Days until next exam: ${daysUntilExam}
-      - Initial sleep profile: ${sleepHours} hrs
-      - Stress coping: ${stressEatingPattern.join(", ")}
-      - Cravings: ${cravingType.join(", ")}
-      - Study/coding hours per day: ${studyHours} hrs
-      - Has job: ${hasJob ? "Yes" : "No"}
-      - Chronic Burnout Phase: ${burnoutPhase ? "Active" : "Inactive"} (${maxConsecutiveStressDays} consecutive check-ins with stress >= 4/5)
+Profile: Semester ${semester}, Exam in ${daysUntilExam}, Sleep ${sleepHours}hrs, Study ${studyHours}hrs/day, Job: ${hasJob ? "Yes" : "No"}
+Burnout State: ${wellnessState.burnoutState}, Recovery: ${wellnessState.recoveryDaysCompleted}/${wellnessState.recoveryDaysRequired} days
+Spending: Total $${totalSpend.toFixed(0)}, Food $${totalFoodBudgetSpend.toFixed(0)}, Coping $${copingSpend.toFixed(0)}
 
-      Recent Daily Check-ins (Last 7 Days):
-      ${recentCheckinsText || "No check-ins submitted yet."}
+Recent Check-ins:
+${recentCheckinsText || "None"}
 
-      Financial & Spending Signals:
-      - Total Monthly Spend: $${totalSpend.toFixed(2)} USD
-      - Food Budget Limit: $${totalFoodBudgetLimit.toFixed(2)} USD, Food Budget Spent: $${totalFoodBudgetSpend.toFixed(2)} USD
-      - Coping/Junk Food & Shopping Spend: $${copingSpend.toFixed(2)} USD
-      - Spending Spike in Exam Prep Window: $${examWindowSpend.toFixed(2)} USD
+Respond in JSON:
+{"todayText":"1-line today summary","recoveryText":"burnout/recovery status","suggestedAction":"1 actionable tip","weeklyTrendLabel":"Improving/Stable/Worsening"}`;
 
-      Detect stress levels, coping mechanisms (like stress eating or shopping overruns), and irregular sleep patterns.
-      Classify their burnout risk. Provide the response strictly in JSON format with exactly three fields:
-      "riskLevel": "Low", "Moderate", or "High"
-      "reason": a 1-line description of the classification combining wellness & spending observations (e.g. "Frequent skipped meals and overspending on Doordash near exams")
-      "tip": a single actionable tip related to sleep, study schedule, or financial/spending habits.
-      
-      CRITICAL INSTRUCTION: If Chronic Burnout Phase is Active, you MUST classify riskLevel as "High". The reason must state that chronic burnout is active due to sustained high stress levels, and the tip MUST recommend using the 4-7-8 breathing spacer modal on their dashboard to help them relax.
+    const content = await chatCompletion(
+      [{ role: "user", content: userPrompt }],
+      { maxTokens: 400, jsonMode: true }
+    );
 
-      Format:
-      {
-        "riskLevel": "Low/Moderate/High",
-        "reason": "...",
-        "tip": "..."
-      }
-    `;
+    if (!content) {
+      return { ...getFallbackAnalysis(today, wellnessState, checkins), source: "Quick Analysis" };
+    }
 
-    const chatCompletion = await openai.chat.completions.create({
-      model: modelName,
-      messages: [{ role: "user", content: userPrompt }],
-      response_format: { type: "json_object" },
-      max_tokens: 1000
-    });
-
-    const content = chatCompletion.choices[0].message.content;
     const parsed = JSON.parse(content);
-    return {
-      ...parsed,
-      source: "AI Analysis"
-    };
+    return { ...parsed, source: "AI Analysis" };
   } catch (error) {
-    console.error("Error generating burnout analysis from LLM:", error);
-    const fallbackVal = fallbackBurnoutAnalysis(profile, financeData, burnoutInfo);
-    return {
-      ...fallbackVal,
-      source: "Quick Analysis"
-    };
+    console.error("Error generating burnout analysis:", error.message);
+    return { ...getFallbackAnalysis(today, wellnessState, checkins), source: "Quick Analysis" };
   }
 };
 

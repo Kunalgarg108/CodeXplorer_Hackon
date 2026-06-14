@@ -17,8 +17,8 @@ const menuList = [
   { name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses", colorClass: "text-[#ff8833]" },
   
   { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner", colorClass: "text-cyan-400" },
-  { name: "Fitness", icon: Activity, path: "/dashboard/fitness", colorClass: "text-[#00cc4b]" },
   { name: "Wellness Profile", icon: Heart, path: "/dashboard/wellness", colorClass: "text-tag-coral" },
+  { name: "Fitness", icon: Activity, path: "/dashboard/fitness", colorClass: "text-[#00cc4b]" },
 ];
 
 export default function DashboardLayout() {
@@ -36,31 +36,33 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-midnight">
-      <div className="fixed md:w-64 hidden md:block z-40">
-        <div className="h-screen p-6 bg-deep border-r border-steel/30 shadow-neo">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
-              <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
+      <div className="fixed md:w-[270px] hidden md:block z-40 h-screen">
+        <div className="h-full p-6 bg-deep border-r border-steel/30 shadow-neo flex flex-col justify-between">
+          <div className="flex flex-col flex-1 min-h-0">
+            <div className="flex items-center gap-3 mb-8 shrink-0">
+              <div className="w-9 h-9 rounded-btn bg-paper flex items-center justify-center">
+                <img src="/chart-donut.svg" alt="logo" width={22} height={22} />
+              </div>
+              <span className="font-display font-medium text-paper">PocketBuddy</span>
             </div>
-            <span className="font-display font-medium text-paper">FinanSmart</span>
+            <nav className="mt-2 overflow-y-auto flex-1 sidebar-scroll pr-1">
+              {menuList.map((menu, index) => (
+                <Link to={menu.path} key={index}>
+                  <div className={`nav-link ${path === menu.path ? "nav-link-active" : ""}`}>
+                    <menu.icon size={18} className={path === menu.path ? "text-[#1c6cff]" : menu.colorClass} />
+                    {menu.name}
+                  </div>
+                </Link>
+              ))}
+            </nav>
           </div>
-          <nav className="mt-2">
-            {menuList.map((menu, index) => (
-              <Link to={menu.path} key={index}>
-                <div className={`nav-link ${path === menu.path ? "nav-link-active" : ""}`}>
-                  <menu.icon size={18} className={path === menu.path ? "text-[#1c6cff]" : menu.colorClass} />
-                  {menu.name}
-                </div>
-              </Link>
-            ))}
-          </nav>
           <div
-            className="fixed bottom-8 left-6 right-6 md:right-auto md:w-52 flex justify-between items-center p-4 neo-card cursor-pointer hover:border-signal/30 transition-all"
+            className="mt-6 flex justify-between items-center p-4 neo-card cursor-pointer hover:border-signal/30 transition-all shrink-0 w-full"
             onClick={() => navigate("/dashboard/profile")}
           >
-                  <div className="w-9 h-9 rounded-btn bg-signal text-paper flex items-center justify-center text-sm font-display font-semibold transition-all duration-300 hover:scale-125 hover:shadow-[0_0_20px_rgba(28,108,255,0.6)]">
-        {user?.name?.[0]?.toUpperCase()}
-      </div>
+            <div className="w-9 h-9 rounded-btn bg-signal text-paper flex items-center justify-center text-sm font-display font-semibold transition-all duration-300 hover:scale-125 hover:shadow-[0_0_20px_rgba(28,108,255,0.6)]">
+              {user?.name?.[0]?.toUpperCase()}
+            </div>
 
             <Button
               variant="link"
@@ -75,9 +77,9 @@ export default function DashboardLayout() {
           </div>
         </div>
       </div>
-      <div className="md:ml-64 min-h-screen">
+      <div className="md:ml-[270px] min-h-screen">
         <div className="p-4 border-b border-steel/30 flex justify-between items-center md:hidden bg-deep">
-          <span className="font-display text-paper text-sm">FinanSmart</span>
+          <span className="font-display text-paper text-sm">PocketBuddy</span>
           <Button variant="outline" size="sm" onClick={logout}>Logout</Button>
         </div>
         <Outlet />

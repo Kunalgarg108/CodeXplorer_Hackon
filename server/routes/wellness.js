@@ -8,11 +8,116 @@ import { getWeeklyAnalysis } from "../utils/getWeeklyAnalysis.js";
 
 const router = express.Router();
 
+export function updateBurnoutState(history, state = {}) {
+  if (!history || history.length === 0) {
+    return {
+      burnoutState: "normal",
+      triggerDate: null,
+      recoveryDaysRequired: 3,
+      recoveryDaysCompleted: 0
+    };
+  }
+
+  // Sort history chronologically
+  const sortedCheckins = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+  
+  let burnoutState = "normal";
+  let triggerDate = null;
+  let recoveryDaysRequired = state.recoveryDaysRequired || 3;
+  let recoveryDaysCompleted = 0;
+
+  for (let i = 0; i < sortedCheckins.length; i++) {
+    const today = sortedCheckins[i];
+    const isHealthyDay = (today.stressLevel <= 2 && today.sleepHours >= 6);
+    
+    // count trailing days where stressLevel >= 4 up to index i
+    let consecutiveBadDays = 0;
+    for (let j = i; j >= 0; j--) {
+      if (sortedCheckins[j].stressLevel >= 4) {
+        consecutiveBadDays++;
+      } else {
+        break;
+      }
+    }
+
+    switch (burnoutState) {
+      case "normal":
+        if (consecutiveBadDays >= 5) {
+          burnoutState = "chronic";
+          triggerDate = today.date;
+          recoveryDaysCompleted = 0;
+        } else if (consecutiveBadDays >= 2) {
+          burnoutState = "warning";
+        }
+        break;
+
+      case "warning":
+        if (consecutiveBadDays >= 5) {
+          burnoutState = "chronic";
+          triggerDate = today.date;
+          recoveryDaysCompleted = 0;
+        } else if (consecutiveBadDays === 0) {
+          burnoutState = "normal";
+        }
+        break;
+
+      case "chronic":
+        burnoutState = "recovering";
+        recoveryDaysCompleted = isHealthyDay ? 1 : 0;
+        break;
+
+      case "recovering":
+        if (isHealthyDay) {
+          recoveryDaysCompleted += 1;
+        } else {
+          recoveryDaysCompleted = 0;
+        }
+
+        if (recoveryDaysCompleted >= recoveryDaysRequired) {
+          burnoutState = "normal";
+          triggerDate = null;
+          recoveryDaysCompleted = 0;
+        }
+        break;
+    }
+  }
+
+  return {
+    burnoutState,
+    triggerDate,
+    recoveryDaysRequired,
+    recoveryDaysCompleted
+  };
+}
+
+async function recomputeWellnessState(user) {
+  if (!user.wellnessProfile) {
+    user.wellnessProfile = {};
+  }
+  const checkins = user.wellnessProfile.dailyCheckins || [];
+  const state = {
+    burnoutState: user.wellnessProfile.burnoutState || "normal",
+    triggerDate: user.wellnessProfile.triggerDate || null,
+    recoveryDaysRequired: user.wellnessProfile.recoveryDaysRequired || 3,
+    recoveryDaysCompleted: user.wellnessProfile.recoveryDaysCompleted || 0
+  };
+  const updatedState = updateBurnoutState(checkins, state);
+  
+  user.wellnessProfile.burnoutState = updatedState.burnoutState;
+  user.wellnessProfile.triggerDate = updatedState.triggerDate;
+  user.wellnessProfile.recoveryDaysRequired = updatedState.recoveryDaysRequired;
+  user.wellnessProfile.recoveryDaysCompleted = updatedState.recoveryDaysCompleted;
+  
+  user.markModified("wellnessProfile");
+  await user.save();
+}
+
 // GET /api/wellness - get user's wellness profile
 router.get("/", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
+    await recomputeWellnessState(user);
     res.json({ wellnessProfile: user.wellnessProfile || {} });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -32,6 +137,7 @@ router.put("/", auth, async (req, res) => {
     };
 
     await user.save();
+    await recomputeWellnessState(user);
     res.json({ message: "Wellness profile updated", wellnessProfile: user.wellnessProfile });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -75,7 +181,7 @@ router.post("/checkin", auth, async (req, res) => {
       user.wellnessProfile.dailyCheckins.push(checkinData);
     }
 
-    await user.save();
+    await recomputeWellnessState(user);
     res.json({ message: "Daily check-in saved", wellnessProfile: user.wellnessProfile });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -109,6 +215,8 @@ router.get("/analyze", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    await recomputeWellnessState(user);
 
     // Get user's wellness profile or construct standard defaults
     const profile = user.wellnessProfile || {
@@ -188,54 +296,36 @@ router.get("/analyze", auth, async (req, res) => {
       totalSpend
     };
 
-    // Calculate if user has logged stressLevel >= 4 for 3 consecutive check-ins
-    const lastResolved = profile.lastResolvedBurnout ? new Date(profile.lastResolvedBurnout) : null;
+    // Calculate trailing consecutive days where stressLevel >= 4
     const checkins = profile.dailyCheckins || [];
-    
-    // Filter check-ins to only look at entries logged after lastResolved
-    let filteredCheckins = [...checkins];
-    if (lastResolved) {
-      filteredCheckins = checkins.filter(c => new Date(c.date) > lastResolved);
-    }
-    
-    const sortedCheckins = filteredCheckins.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sortedAllCheckins = [...checkins].sort((a, b) => new Date(a.date) - new Date(b.date));
     
     let consecutiveStressDays = 0;
-    let maxConsecutiveStressDays = 0;
-    let burnoutPhase = false;
-
-    sortedCheckins.forEach((c) => {
-      if (c.stressLevel >= 4) {
+    for (let j = sortedAllCheckins.length - 1; j >= 0; j--) {
+      if (sortedAllCheckins[j].stressLevel >= 4) {
         consecutiveStressDays++;
-        if (consecutiveStressDays > maxConsecutiveStressDays) {
-          maxConsecutiveStressDays = consecutiveStressDays;
-        }
       } else {
-        consecutiveStressDays = 0;
-      }
-    });
-
-    if (maxConsecutiveStressDays >= 3) {
-      burnoutPhase = true;
-    }
-
-    // Determine recurrence escalation (if next burnout triggers within 7 days of resolving the previous one)
-    let isRecurrent = false;
-    if (burnoutPhase && lastResolved) {
-      const daysSinceResolution = (new Date() - lastResolved) / (1000 * 60 * 60 * 24);
-      if (daysSinceResolution < 7) {
-        isRecurrent = true;
+        break;
       }
     }
 
-    // Run burnout analysis combining profile + checkins + finance data + burnout flag
-    const analysis = await getBurnoutAnalysis(profile, financeData, { burnoutPhase, maxConsecutiveStressDays });
+    const wellnessState = {
+      burnoutState: profile.burnoutState || "normal",
+      triggerDate: profile.triggerDate || null,
+      recoveryDaysRequired: profile.recoveryDaysRequired || 3,
+      recoveryDaysCompleted: profile.recoveryDaysCompleted || 0
+    };
+
+    // Run burnout analysis combining profile + finance data + wellnessState
+    const analysis = await getBurnoutAnalysis(profile, financeData, wellnessState);
     
     res.json({
       ...analysis,
-      burnoutPhase,
-      consecutiveStressDays: maxConsecutiveStressDays,
-      isRecurrent
+      burnoutState: wellnessState.burnoutState,
+      triggerDate: wellnessState.triggerDate,
+      recoveryDaysRequired: wellnessState.recoveryDaysRequired,
+      recoveryDaysCompleted: wellnessState.recoveryDaysCompleted,
+      consecutiveStressDays
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -20,10 +20,10 @@ export default function Home() {
             <div style={{ width: 28, height: 28, borderRadius: 8, background: "#1c6cff", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <img src="/chart-donut.svg" alt="logo" width={16} height={16} />
             </div>
-            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 14, color: "#fff" }}>FinanSmart</span>
+            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 14, color: "#fff" }}>PocketBuddy</span>
           </div>
           <p style={{ color: "#999ca1", fontSize: 13, fontWeight: 300 }}>
-            © 2025 FinanSmart. Built with ❤️ for financial clarity.
+            © 2025 PocketBuddy. Built with ❤️ for financial clarity.
           </p>
         </div>
       </footer>

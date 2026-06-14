@@ -53,15 +53,17 @@ app.use("/api/reports", reportRoutes);
 
 const start = async () => {
   try {
+    // Validate required env vars
+    const required = ["OPENAI_API_KEY", "OPENAI_BASE_URL", "AWS_REGION"];
+    const missing = required.filter((k) => !process.env[k]);
+    if (missing.length > 0) {
+      console.warn(`⚠️  Missing env vars: ${missing.join(", ")}`);
+    }
+
+
     await connectDB();
+
     app.listen(PORT, () => {
-      console.log("=================================");
-console.log("ENV DEBUG");
-console.log("AWS_REGION =", process.env.AWS_REGION);
-console.log("AWS_ACCESS_KEY_ID =", process.env.AWS_ACCESS_KEY_ID ? "FOUND" : "MISSING");
-console.log("AWS_SECRET_ACCESS_KEY =", process.env.AWS_SECRET_ACCESS_KEY ? "FOUND" : "MISSING");
-console.log("BEDROCK_MODEL_ID =", process.env.BEDROCK_MODEL_ID);
-console.log("=================================");
       console.log(`Server running on http://localhost:${PORT}`);
     });
   } catch (error) {

@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import { motion } from "framer-motion";
 import BreathingSpacer from "@/components/dashboard/BreathingSpacer";
+import RecoveryStatusCard from "@/components/dashboard/RecoveryStatusCard";
 
 const chartStyle = {
   background: "#010d1e",
@@ -43,36 +44,80 @@ export default function Wellness() {
     const todayStr = new Date().toDateString();
     const todayCheckin = checkins.find(c => new Date(c.date).toDateString() === todayStr);
 
+    const wellnessState = {
+      burnoutState: profile?.burnoutState || "normal",
+      triggerDate: profile?.triggerDate || null,
+      recoveryDaysRequired: profile?.recoveryDaysRequired || 3,
+      recoveryDaysCompleted: profile?.recoveryDaysCompleted || 0
+    };
+
+    let todayText = "";
     if (!todayCheckin) {
-      return {
-        riskLevel: "Low",
-        reason: "No check-in submitted for today. Check in from your Dashboard page to view today's stress report.",
-        tip: "Keep checking in daily to monitor your stress trends.",
-        source: "Quick Analysis"
-      };
+      todayText = "No check-in logged for today. Update today's update to view metrics.";
+    } else if (todayCheckin.stressLevel <= 2) {
+      todayText = "Today looks like a good day — low stress and decent sleep support recovery.";
+    } else if (todayCheckin.stressLevel >= 4) {
+      todayText = "Today shows elevated stress. Consider a short break or the 4-7-8 breathing exercise.";
+    } else {
+      todayText = "Today is a moderate day — keep an eye on sleep and stress levels.";
     }
 
-    const { sleepHours = 7, stressLevel = 3, eatingPattern = "Healthy" } = todayCheckin;
+    let triggerDateStr = wellnessState.triggerDate 
+      ? new Date(wellnessState.triggerDate).toLocaleDateString()
+      : "recently";
 
-    let riskLevel = "Low";
-    if (sleepHours < 5 && stressLevel >= 4) {
-      riskLevel = "High";
-    } else if (sleepHours < 6 || stressLevel >= 4) {
-      riskLevel = "Moderate";
+    let recoveryText = "";
+    if (wellnessState.burnoutState === "chronic") {
+      recoveryText = `Chronic burnout was flagged on ${triggerDateStr} due to sustained high stress. Focus on consistent sleep and stress reduction starting today.`;
+    } else if (wellnessState.burnoutState === "recovering") {
+      const remaining = Math.max(0, (wellnessState.recoveryDaysRequired || 3) - (wellnessState.recoveryDaysCompleted || 0));
+      recoveryText = `Recovering from a high-stress period flagged on ${triggerDateStr}. ${wellnessState.recoveryDaysCompleted || 0}/${wellnessState.recoveryDaysRequired || 3} healthy days logged — ${remaining} more to fully recover.`;
+    } else if (wellnessState.burnoutState === "warning") {
+      recoveryText = "Stress has been elevated for multiple days. Watch for a developing pattern.";
+    } else {
+      recoveryText = "No burnout pattern detected — wellness levels look stable.";
     }
 
-    const reason = `Your sleep was ${sleepHours} hrs and stress level was ${stressLevel}/5 today. Eating pattern logged: ${eatingPattern}.`;
-
-    let tip = "Keep up the healthy daily check-in habits and maintain a stable study-rest balance.";
-    if (sleepHours < 6) {
-      tip = "Prioritize sleep hygiene by aiming for a consistent sleep schedule and creating a relaxing bedtime routine.";
-    } else if (eatingPattern === "Skipped meals" || eatingPattern === "Binged") {
-      tip = "Ensure you have balanced nutritional intake at regular intervals and avoid skipping meals under pressure.";
-    } else if (stressLevel >= 4) {
-      tip = "Try taking a brief break and practicing a 4-7-8 breathing exercise to soothe your nervous system.";
+    let suggestedAction = "";
+    if (wellnessState.burnoutState === "recovering") {
+      const remaining = Math.max(0, (wellnessState.recoveryDaysRequired || 3) - (wellnessState.recoveryDaysCompleted || 0));
+      suggestedAction = `Keep today's routine going — ${remaining} more day(s) like this and recovery is complete.`;
+    } else if (todayCheckin && todayCheckin.stressLevel <= 2) {
+      suggestedAction = "Try the 4-7-8 breathing exercise to maintain this calm state.";
+    } else {
+      suggestedAction = "Prioritize 7-8 hours of sleep tonight and avoid stress-eating triggers.";
     }
 
-    return { riskLevel, reason, tip, source: "Quick Analysis" };
+    // Determine weeklyTrendLabel from history
+    let weeklyTrendLabel = "Stable";
+    if (checkins && checkins.length >= 2) {
+      const sorted = [...checkins].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const recent = sorted.slice(-7);
+      if (recent.length >= 2) {
+        const alpha = 0.3;
+        let ewma = recent[0].stressLevel;
+        let prevEwma = ewma;
+        for (let i = 1; i < recent.length; i++) {
+          prevEwma = ewma;
+          ewma = alpha * recent[i].stressLevel + (1 - alpha) * ewma;
+        }
+        const diff = ewma - prevEwma;
+        if (diff < -0.15) weeklyTrendLabel = "Improving";
+        else if (diff > 0.15) weeklyTrendLabel = "Worsening";
+      }
+    }
+
+    return {
+      todayText,
+      recoveryText,
+      suggestedAction,
+      weeklyTrendLabel,
+      burnoutState: wellnessState.burnoutState,
+      triggerDate: wellnessState.triggerDate,
+      recoveryDaysRequired: wellnessState.recoveryDaysRequired,
+      recoveryDaysCompleted: wellnessState.recoveryDaysCompleted,
+      source: "Quick Analysis"
+    };
   };
 
   const getWeeklyReportFallback = (checkins) => {
@@ -197,33 +242,43 @@ export default function Wellness() {
     fetchProfile();
   };
 
-  const getRiskColor = (level) => {
-    if (level === "High") return "border-[#ff4433] bg-[#ff4433]/5 text-[#ff4433]";
-    if (level === "Moderate") return "border-[#ff8833] bg-[#ff8833]/5 text-[#ff8833]";
-    return "border-[#00cc4b] bg-[#00cc4b]/5 text-[#00cc4b]";
+  const getTodayStatusLabel = (checkin) => {
+    if (!checkin) return "";
+    const { sleepHours, stressLevel } = checkin;
+    if (stressLevel >= 4) return "Stressful";
+    if (stressLevel === 3 || sleepHours < 6) return "Moderate";
+    return "Relaxed";
   };
 
-  const getRiskBadgeStyle = (level) => {
-    if (level === "High") return "bg-[#ff4433]/15 text-[#ff4433] border-[#ff4433]/40 border";
-    if (level === "Moderate") return "bg-[#ff8833]/15 text-[#ff8833] border-[#ff8833]/40 border";
-    return "bg-[#00cc4b]/15 text-[#00cc4b] border-[#00cc4b]/40 border";
-  };
-
-  const getRiskEmoji = (level) => {
-    if (level === "High") return "😫";
-    if (level === "Moderate") return "😐";
+  const getTodayStatusEmoji = (status) => {
+    if (status === "Stressful") return "😫";
+    if (status === "Moderate") return "😐";
     return "😊";
   };
 
-  const getRecommendations = (level) => {
-    if (level === "High") {
+  const getTodayStatusBadgeStyle = (status) => {
+    if (status === "Stressful") return "bg-[#ff4433]/15 text-[#ff4433] border-[#ff4433]/40 border";
+    if (status === "Moderate") return "bg-[#ff8833]/15 text-[#ff8833] border-[#ff8833]/40 border";
+    return "bg-[#00cc4b]/15 text-[#00cc4b] border-[#00cc4b]/40 border";
+  };
+
+  const getTodayStatusColor = (checkin) => {
+    if (!checkin) return "border-[#00cc4b] bg-[#00cc4b]/5 text-[#00cc4b]";
+    const { sleepHours, stressLevel } = checkin;
+    if (stressLevel >= 4) return "border-[#ff4433] bg-[#ff4433]/5 text-[#ff4433]";
+    if (stressLevel === 3 || sleepHours < 6) return "border-[#ff8833] bg-[#ff8833]/5 text-[#ff8833]";
+    return "border-[#00cc4b] bg-[#00cc4b]/5 text-[#00cc4b]";
+  };
+
+  const getRecommendations = (status) => {
+    if (status === "Stressful") {
       return [
         { title: "Use the Breathing Spacer", desc: "Try our 4-7-8 breathing tool on your Dashboard to quickly relax.", icon: Wind, color: "text-[#ff4433]" },
         { title: "Enforce a Sleep Schedule", desc: "Lock in a minimum of 7-8 hours tonight; close screens 1 hr before bed.", icon: Moon, color: "text-[#1c6cff]" },
         { title: "Control Comfort Spending", desc: "Avoid stress-ordering food delivery. Prepare a simple snack instead.", icon: Apple, color: "text-[#ff8833]" }
       ];
     }
-    if (level === "Moderate") {
+    if (status === "Moderate") {
       return [
         { title: "Review Comfort Outlays", desc: "Impulse shopping might trigger when stressed. Monitor your transactions.", icon: Shield, color: "text-[#ff8833]" },
         { title: "Take Active Micro-Breaks", desc: "Take a 5-minute screen-free walk for every 90 minutes of study or coding.", icon: Wind, color: "text-[#00cc4b]" },
@@ -238,29 +293,29 @@ export default function Wellness() {
   };
 
   const renderWowBadge = () => {
-    if (!weeklyReport) return null;
-    const { trendDirection = "flat", trendPercentage = 0 } = weeklyReport;
+    if (!todayReport) return null;
+    const { weeklyTrendLabel = "Stable" } = todayReport;
 
-    if (trendDirection === "up") {
-      return (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[#ff4433]/10 border-[#ff4433]/30 text-[#ff4433] text-xs font-semibold w-fit">
-          <ArrowUpRight className="w-4 h-4" />
-          <span>{trendPercentage}% Stress Increase</span>
-        </div>
-      );
-    }
-    if (trendDirection === "down") {
+    if (weeklyTrendLabel === "Improving") {
       return (
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[#00cc4b]/10 border-[#00cc4b]/30 text-[#00cc4b] text-xs font-semibold w-fit">
           <ArrowDownRight className="w-4 h-4" />
-          <span>{trendPercentage}% Stress Decrease</span>
+          <span>Improving EWMA Trend</span>
+        </div>
+      );
+    }
+    if (weeklyTrendLabel === "Worsening") {
+      return (
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[#ff4433]/10 border-[#ff4433]/30 text-[#ff4433] text-xs font-semibold w-fit">
+          <ArrowUpRight className="w-4 h-4" />
+          <span>Worsening EWMA Trend</span>
         </div>
       );
     }
     return (
       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border bg-[#999ca1]/10 border-[#999ca1]/30 text-[#999ca1] text-xs font-semibold w-fit">
         <Activity className="w-4 h-4" />
-        <span>Steady / No WoW Change</span>
+        <span>Stable EWMA Trend</span>
       </div>
     );
   };
@@ -322,7 +377,7 @@ export default function Wellness() {
       </div>
 
       {/* Burnout Alert Banner */}
-      {todayReport?.burnoutPhase && (
+      {todayReport?.burnoutState === "chronic" && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -339,13 +394,10 @@ export default function Wellness() {
             </span>
             <div>
               <h4 className="text-sm font-bold text-[#ff4433] font-display flex items-center gap-1.5">
-                {todayReport?.isRecurrent ? "⚠️ Recurrent Burnout Alarm" : "🚨 Chronic Burnout Warning Active"}
+                🚨 Chronic Burnout Warning Active
               </h4>
               <p className="text-xs text-fog font-thin mt-1">
-                {todayReport?.isRecurrent 
-                  ? "This is a repeating burnout phase. Please take a longer break and focus on self-care."
-                  : `You've recorded high stress (≥ 4/5) for ${todayReport?.consecutiveStressDays || 3} consecutive check-ins. Let's reset.`
-                }
+                You've recorded high stress (≥ 4/5) for {todayReport?.consecutiveStressDays || 5} consecutive check-ins. Let's reset.
               </p>
             </div>
           </div>
@@ -482,122 +534,148 @@ export default function Wellness() {
         </div>
       </div>
 
-      {/* SECTION 2: Today's Report */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="eyebrow text-xs font-semibold text-signal uppercase tracking-widest">
-            Today's Report
-          </p>
-          <div className="flex items-center gap-2">
-            {todayReport && (
-              <span className={`text-[9px] uppercase font-semibold px-2 py-0.5 rounded-full border ${
-                todayReport.source === "AI Analysis" 
-                  ? "bg-signal/15 text-signal border-signal/30" 
-                  : "bg-[#999ca1]/15 text-[#999ca1] border-[#999ca1]/30"
-              }`}>
-                {todayReport.source}
-              </span>
-            )}
-            <button 
-              onClick={() => fetchTodayReport(profile.dailyCheckins)}
-              disabled={loadingTodayReport}
-              className="p-1 rounded bg-[#001533] border border-[#11263b] hover:text-white text-mist transition-colors disabled:opacity-50"
-              title="Recalculate Today's Report"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loadingTodayReport ? "animate-spin" : ""}`} />
-            </button>
+      {/* SECTION 2: Today's Report & Recovery Progress */}
+      <div className="grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-6 items-stretch">
+        {/* Today's Report Card */}
+        <div className="space-y-4 flex flex-col">
+          <div className="flex items-center justify-between">
+            <p className="eyebrow text-xs font-semibold text-signal uppercase tracking-widest">
+              Today's Report
+            </p>
+            <div className="flex items-center gap-2">
+              {todayReport && (
+                <span className={`text-[9px] uppercase font-semibold px-2 py-0.5 rounded-full border ${
+                  todayReport.source === "AI Analysis" 
+                    ? "bg-signal/15 text-signal border-signal/30" 
+                    : "bg-[#999ca1]/15 text-[#999ca1] border-[#999ca1]/30"
+                }`}>
+                  {todayReport.source}
+                </span>
+              )}
+              <button 
+                onClick={() => fetchTodayReport(profile.dailyCheckins)}
+                disabled={loadingTodayReport}
+                className="p-1 rounded bg-[#001533] border border-[#11263b] hover:text-white text-mist transition-colors disabled:opacity-50"
+                title="Recalculate Today's Report"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingTodayReport ? "animate-spin" : ""}`} />
+              </button>
+            </div>
           </div>
-        </div>
 
-        {loadingTodayReport ? (
-          <div className="h-[250px] w-full skeleton-pulse rounded-2xl" />
-        ) : !todayCheckin ? (
-          <div className="max-w-md mx-auto w-full">
-            <DailyCheckinCard onSubmitSuccess={fetchProfile} />
-          </div>
-        ) : (
-          <div className={`neo-card border-l-4 ${getRiskColor(todayReport?.riskLevel)} p-6 bg-[#010d1e]/30 rounded-2xl`}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              {/* Left Column: Today's Stats */}
-              <div className="space-y-3 lg:border-r lg:border-[#11263b]/30 lg:pr-6">
-                <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#11263b]/30">
-                  <span className="text-xs font-semibold text-paper">Today's Logged Metrics</span>
-                  <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${getRiskBadgeStyle(todayReport?.riskLevel)}`}>
-                    {todayReport?.riskLevel} Risk {getRiskEmoji(todayReport?.riskLevel)}
-                  </span>
-                </div>
+          {loadingTodayReport ? (
+            <div className="h-[250px] w-full skeleton-pulse rounded-2xl flex-1" />
+          ) : !todayCheckin ? (
+            <div className="max-w-md mx-auto w-full flex-1 flex items-center justify-center">
+              <DailyCheckinCard onSubmitSuccess={fetchProfile} />
+            </div>
+          ) : (
+            <div className={`neo-card border-l-4 ${getTodayStatusColor(todayCheckin)} p-6 bg-[#010d1e]/30 rounded-2xl flex-1 flex flex-col justify-between`}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                {/* Left Column: Today's Stats */}
+                <div className="space-y-3 md:border-r md:border-[#11263b]/30 md:pr-6">
+                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#11263b]/30">
+                    <span className="text-xs font-semibold text-paper">Today's Logged Metrics</span>
+                    {todayCheckin && (
+                      <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded ${getTodayStatusBadgeStyle(getTodayStatusLabel(todayCheckin))}`}>
+                        {getTodayStatusLabel(todayCheckin)} {getTodayStatusEmoji(getTodayStatusLabel(todayCheckin))}
+                      </span>
+                    )}
+                  </div>
 
-                {/* Sleep card */}
-                <div className="flex items-center gap-3 p-3 bg-midnight/40 rounded-xl border border-[#11263b]/40">
-                  <Moon className="w-5 h-5 text-[#1c6cff]" />
-                  <div>
-                    <span className="text-[10px] text-mist block">Sleep Hours</span>
-                    <span className="text-sm font-semibold text-paper">{todayCheckin.sleepHours} hrs</span>
+                  {/* Sleep card */}
+                  <div className="flex items-center gap-3 p-3 bg-midnight/40 rounded-xl border border-[#11263b]/40">
+                    <Moon className="w-5 h-5 text-[#1c6cff]" />
+                    <div>
+                      <span className="text-[10px] text-mist block">Sleep Hours</span>
+                      <span className="text-sm font-semibold text-paper">{todayCheckin.sleepHours} hrs</span>
+                    </div>
+                  </div>
+
+                  {/* Eating card */}
+                  <div className="flex items-center gap-3 p-3 bg-midnight/40 rounded-xl border border-[#11263b]/40">
+                    <Utensils className="w-5 h-5 text-[#00cc4b]" />
+                    <div>
+                      <span className="text-[10px] text-mist block">Eating Pattern</span>
+                      <span className="text-sm font-semibold text-paper">{todayCheckin.eatingPattern}</span>
+                    </div>
+                  </div>
+
+                  {/* Stress card */}
+                  <div className="flex items-center gap-3 p-3 bg-midnight/40 rounded-xl border border-[#11263b]/40">
+                    <Smile className="w-5 h-5 text-[#ff8833]" />
+                    <div>
+                      <span className="text-[10px] text-mist block">Stress Level</span>
+                      <span className="text-sm font-semibold text-paper">{todayCheckin.stressLevel} / 5</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Eating card */}
-                <div className="flex items-center gap-3 p-3 bg-midnight/40 rounded-xl border border-[#11263b]/40">
-                  <Utensils className="w-5 h-5 text-[#00cc4b]" />
+                {/* Middle Column: Summary & Actions */}
+                <div className="space-y-4 md:border-r md:border-[#11263b]/30 md:pr-6">
                   <div>
-                    <span className="text-[10px] text-mist block">Eating Pattern</span>
-                    <span className="text-sm font-semibold text-paper">{todayCheckin.eatingPattern}</span>
-                  </div>
-                </div>
-
-                {/* Stress card */}
-                <div className="flex items-center gap-3 p-3 bg-midnight/40 rounded-xl border border-[#11263b]/40">
-                  <Smile className="w-5 h-5 text-[#ff8833]" />
-                  <div>
-                    <span className="text-[10px] text-mist block">Stress Level</span>
-                    <span className="text-sm font-semibold text-paper">{todayCheckin.stressLevel} / 5</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Middle Column: Summary & Actions */}
-              <div className="space-y-4 lg:border-r lg:border-[#11263b]/30 lg:pr-6">
-                <div>
-                  <span className="text-[10px] font-semibold text-mist uppercase tracking-widest block mb-1">Analysis Summary</span>
-                  <p className="text-sm font-light text-[#ccced0] leading-relaxed">
-                    {todayReport?.reason}
-                  </p>
-                </div>
-                
-                <div className="p-4 bg-midnight rounded-xl border border-[#11263b]/60 flex items-start gap-3">
-                  <span className="text-xl shrink-0 mt-0.5" role="img" aria-label="lightbulb">💡</span>
-                  <div>
-                    <span className="text-xs font-semibold text-signal uppercase tracking-wider block mb-0.5">Suggested Action</span>
+                    <span className="text-[10px] font-semibold text-mist uppercase tracking-widest block mb-1">Analysis Summary</span>
                     <p className="text-sm font-light text-[#ccced0] leading-relaxed">
-                      {todayReport?.tip}
+                      {todayReport?.todayText || "No today-specific report is available."}
                     </p>
                   </div>
+                  
+                  <div className="p-4 bg-midnight rounded-xl border border-[#11263b]/60 flex items-start gap-3">
+                    <span className="text-xl shrink-0 mt-0.5" role="img" aria-label="lightbulb">💡</span>
+                    <div>
+                      <span className="text-xs font-semibold text-signal uppercase tracking-wider block mb-0.5">Suggested Action</span>
+                      <p className="text-sm font-light text-[#ccced0] leading-relaxed">
+                        {todayReport?.suggestedAction}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Right Column: Recommendations checklist */}
-              <div className="space-y-4">
-                <span className="text-[10px] font-semibold text-mist uppercase tracking-widest block mb-1">Key Recommendations</span>
-                <div className="space-y-3.5">
-                  {getRecommendations(todayReport?.riskLevel).map((item, idx) => {
-                    const IconComponent = item.icon;
-                    return (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className={`p-1.5 rounded-lg bg-[#001533] border border-[#11263b]/50 shrink-0 ${item.color}`}>
-                          <IconComponent className="w-4 h-4" />
+                {/* Right Column: Recommendations checklist */}
+                <div className="space-y-4">
+                  <span className="text-[10px] font-semibold text-mist uppercase tracking-widest block mb-1">Key Recommendations</span>
+                  <div className="space-y-3.5">
+                    {getRecommendations(getTodayStatusLabel(todayCheckin)).map((item, idx) => {
+                      const IconComponent = item.icon;
+                      return (
+                        <div key={idx} className="flex items-start gap-3">
+                          <div className={`p-1.5 rounded-lg bg-[#001533] border border-[#11263b]/50 shrink-0 ${item.color}`}>
+                            <IconComponent className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-paper block leading-tight">{item.title}</span>
+                            <span className="text-[11px] text-fog font-thin block leading-normal mt-0.5">{item.desc}</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-xs font-semibold text-paper block leading-tight">{item.title}</span>
-                          <span className="text-[11px] text-fog font-thin block leading-normal mt-0.5">{item.desc}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* Recovery Progress Card */}
+        <div className="space-y-4 flex flex-col">
+          <p className="eyebrow text-xs font-semibold text-signal uppercase tracking-widest">
+            Recovery Status
+          </p>
+          {loadingTodayReport ? (
+            <div className="w-full neo-card bg-deep border border-steel/30 rounded-[var(--border-radius-lg)] p-5 h-[250px] flex items-center justify-center">
+              <div className="h-32 w-full skeleton-pulse rounded-xl animate-pulse" />
+            </div>
+          ) : todayReport ? (
+            <RecoveryStatusCard 
+              burnoutState={todayReport.burnoutState}
+              recoveryDaysCompleted={todayReport.recoveryDaysCompleted}
+              recoveryDaysRequired={todayReport.recoveryDaysRequired}
+              triggerDate={todayReport.triggerDate}
+              recoveryText={todayReport.recoveryText}
+              dailyCheckins={profile.dailyCheckins}
+            />
+          ) : null}
+        </div>
       </div>
 
       {/* SECTION 3: Weekly Report */}
