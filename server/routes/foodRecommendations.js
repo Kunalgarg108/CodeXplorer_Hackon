@@ -184,7 +184,9 @@ router.get("/", auth, async (req, res) => {
 
     // Step 5: Send ONLY ranked items to AI for explanation generation
     let explanation = null;
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const isPlaceholderKey = (key) => !key || key.trim() === "" || key.startsWith("your-") || key.includes("placeholder");
+    const rawKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = isPlaceholderKey(rawKey) ? null : rawKey;
 
     if (apiKey && ranked.length > 0) {
       try {

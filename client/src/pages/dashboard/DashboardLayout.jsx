@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutGrid, PiggyBank, ReceiptText, ShieldCheck, CircleDollarSign, LineChart, ScanLine, Heart, Sparkles,
+  LayoutGrid, PiggyBank, ReceiptText, CircleDollarSign, LineChart, ScanLine, Heart, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
@@ -16,7 +16,6 @@ const menuList = [
   { name: "Pocket Buddy AI", icon: Sparkles, path: "/dashboard/pocket-buddy", colorClass: "text-[#a855f7]" },
   { name: "Menu Scanner", icon: ScanLine, path: "/dashboard/menu-scanner", colorClass: "text-cyan-400" },
   { name: "Wellness Profile", icon: Heart, path: "/dashboard/wellness", colorClass: "text-tag-coral" },
-  { name: "Upgrade", icon: ShieldCheck, path: "/dashboard/upgrade", colorClass: "text-amber-400" },
 ];
 
 export default function DashboardLayout() {

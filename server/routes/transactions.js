@@ -4,6 +4,7 @@ import Transaction from "../models/Transaction.js";
 import MerchantCategorization from "../models/MerchantCategorization.js";
 import { auth } from "../middleware/auth.js";
 import { categorizeTransactionMerchant } from "../utils/merchantCategorizer.js";
+import { checkCategoryThresholds } from "../utils/alertHelper.js";
 
 const router = express.Router();
 
@@ -161,6 +162,10 @@ router.post("/", auth, async (req, res) => {
       source: source || "MANUAL",
     });
 
+    if (transaction.transactionType === "DEBIT") {
+      await checkCategoryThresholds(req.user.id, req.user.email, transaction.category, transaction.transactionDate);
+    }
+
     res.status(201).json(toTransactionResponse(transaction));
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -220,14 +225,29 @@ router.patch("/:id", auth, async (req, res) => {
       );
     }
 
+    const originalTxn = await Transaction.findOne({ _id: req.params.id, createdBy: req.user.email });
+    if (!originalTxn)
+      return res.status(404).json({ message: "Transaction not found" });
+
     const transaction = await Transaction.findOneAndUpdate(
       { _id: req.params.id, createdBy: req.user.email },
       updates,
       { new: true }
     );
 
-    if (!transaction)
-      return res.status(404).json({ message: "Transaction not found" });
+    if (originalTxn.transactionType === "DEBIT") {
+      await checkCategoryThresholds(req.user.id, req.user.email, originalTxn.category, originalTxn.transactionDate);
+    }
+    if (transaction.transactionType === "DEBIT" && (
+      transaction.category !== originalTxn.category ||
+      transaction.transactionDate.getTime() !== originalTxn.transactionDate.getTime() ||
+      transaction.amount !== originalTxn.amount ||
+      transaction.excludeFromAnalysis !== originalTxn.excludeFromAnalysis ||
+      transaction.isIgnored !== originalTxn.isIgnored
+    )) {
+      await checkCategoryThresholds(req.user.id, req.user.email, transaction.category, transaction.transactionDate);
+    }
+
     res.json(toTransactionResponse(transaction));
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -248,6 +268,11 @@ router.delete("/:id", auth, async (req, res) => {
 
     if (!transaction)
       return res.status(404).json({ message: "Transaction not found" });
+
+    if (transaction.transactionType === "DEBIT") {
+      await checkCategoryThresholds(req.user.id, req.user.email, transaction.category, transaction.transactionDate);
+    }
+
     res.json({
       message: "Transaction marked as ignored",
       transaction: toTransactionResponse(transaction),
@@ -455,6 +480,8 @@ router.patch("/:id/categorize", auth, async (req, res) => {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
+    const originalCategory = transaction.category;
+
     transaction.category = category;
     transaction.subcategory = subcategory;
     transaction.categoryConfidence = 100;
@@ -487,6 +514,13 @@ router.patch("/:id/categorize", auth, async (req, res) => {
       }
     }
 
+    if (transaction.transactionType === "DEBIT") {
+      await checkCategoryThresholds(req.user.id, req.user.email, originalCategory, transaction.transactionDate);
+      if (transaction.category !== originalCategory) {
+        await checkCategoryThresholds(req.user.id, req.user.email, transaction.category, transaction.transactionDate);
+      }
+    }
+
     res.json({
       success: true,
       message: "Transaction recategorized and rule saved for future statements.",
@@ -512,13 +546,19 @@ router.post("/bulk-action", auth, async (req, res) => {
 
     const query = { _id: { $in: validIds }, createdBy: req.user.email };
 
+    const affectedTxns = await Transaction.find(query);
+    if (affectedTxns.length === 0) {
+      return res.status(404).json({ message: "No matching transactions found" });
+    }
+
+    let responseMessage = "";
+
     if (action === "CATEGORIZE") {
       if (!category) {
         return res.status(400).json({ message: "Category is required for action CATEGORIZE" });
       }
 
-      const txns = await Transaction.find(query);
-      for (const txn of txns) {
+      for (const txn of affectedTxns) {
         txn.category = category;
         txn.subcategory = subcategory;
         txn.categoryConfidence = 100;
@@ -544,10 +584,8 @@ router.post("/bulk-action", auth, async (req, res) => {
         }
       }
 
-      return res.json({ success: true, message: `Successfully categorized ${txns.length} transactions.` });
-    }
-
-    if (action === "EXCLUDE") {
+      responseMessage = `Successfully categorized ${affectedTxns.length} transactions.`;
+    } else if (action === "EXCLUDE") {
       if (excludeFromAnalysis === undefined) {
         return res.status(400).json({ message: "excludeFromAnalysis is required for action EXCLUDE" });
       }
@@ -556,25 +594,38 @@ router.post("/bulk-action", auth, async (req, res) => {
         excludeFromAnalysis: Boolean(excludeFromAnalysis),
       });
 
-      return res.json({
-        success: true,
-        message: `Successfully updated analysis exclusion for ${result.modifiedCount} transactions.`,
-      });
-    }
-
-    if (action === "DELETE") {
+      responseMessage = `Successfully updated analysis exclusion for ${result.modifiedCount} transactions.`;
+    } else if (action === "DELETE") {
       const result = await Transaction.updateMany(query, {
         isIgnored: true,
         deletedAt: new Date(),
       });
 
-      return res.json({
-        success: true,
-        message: `Successfully soft-deleted ${result.modifiedCount} transactions.`,
-      });
+      responseMessage = `Successfully soft-deleted ${result.modifiedCount} transactions.`;
+    } else {
+      return res.status(400).json({ message: "Invalid action type" });
     }
 
-    return res.status(400).json({ message: "Invalid action type" });
+    // Run threshold checks
+    const updatedTxns = await Transaction.find(query);
+    const categoryDates = new Map();
+    const collectCombos = (txns) => {
+      for (const txn of txns) {
+        if (txn.transactionType === "DEBIT" && txn.category) {
+          const dateVal = new Date(txn.transactionDate);
+          const key = `${txn.category}_${dateVal.getFullYear()}_${dateVal.getMonth()}`;
+          categoryDates.set(key, { category: txn.category, date: dateVal });
+        }
+      }
+    };
+    collectCombos(affectedTxns);
+    collectCombos(updatedTxns);
+
+    for (const val of categoryDates.values()) {
+      await checkCategoryThresholds(req.user.id, req.user.email, val.category, val.date);
+    }
+
+    res.json({ success: true, message: responseMessage });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

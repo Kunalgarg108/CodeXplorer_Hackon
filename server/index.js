@@ -16,6 +16,9 @@ import wellnessRoutes from "./routes/wellness.js";
 import budgetAlertRoutes from "./routes/budgetAlerts.js";
 import chatRoutes from "./routes/chat.js";
 import foodRecommendationRoutes from "./routes/foodRecommendations.js";
+import thresholdRoutes from "./routes/thresholds.js";
+import alertRoutes from "./routes/alerts.js";
+import reportRoutes from "./routes/reports.js";
 
 dotenv.config();
 
@@ -40,6 +43,9 @@ app.use("/api/wellness", wellnessRoutes);
 app.use("/api/budget-alerts", budgetAlertRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/food-recommendations", foodRecommendationRoutes);
+app.use("/api/thresholds", thresholdRoutes);
+app.use("/api/alerts", alertRoutes);
+app.use("/api/reports", reportRoutes);
 
 const start = async () => {
   try {

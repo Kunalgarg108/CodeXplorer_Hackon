@@ -134,4 +134,59 @@ export const api = {
   analyzeWeeklyReport: () => request("/wellness/weekly"),
   submitDailyCheckin: (body) => request("/wellness/checkin", { method: "POST", body: JSON.stringify(body) }),
   resolveBurnout: () => request("/wellness/resolve-burnout", { method: "POST" }),
+
+  getThresholds: () => request("/thresholds"),
+  createThreshold: (body) => request("/thresholds", { method: "POST", body: JSON.stringify(body) }),
+  updateThreshold: (id, body) => request(`/thresholds/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  deleteThreshold: (id) => request(`/thresholds/${id}`, { method: "DELETE" }),
+
+  getAlerts: () => request("/alerts"),
+  markAlertRead: (id) => request(`/alerts/${id}/read`, { method: "PATCH" }),
+  deleteAlert: (id) => request(`/alerts/${id}`, { method: "DELETE" }),
+
+  getAIInsights: () => request("/advice/insights"),
+
+  exportTransactionsCSV: async (params = "") => {
+    const token = getToken();
+    const headers = {
+      ...(token && { Authorization: `Bearer ${token}` }),
+    };
+    const res = await fetch(`${API_BASE}/reports/transaction-export${params ? `?${params}` : ""}`, {
+      headers,
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to export CSV");
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `transactions_export_${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  },
+
+  downloadSpendingReportPDF: async (month = "") => {
+    const token = getToken();
+    const headers = {
+      ...(token && { Authorization: `Bearer ${token}` }),
+    };
+    const res = await fetch(`${API_BASE}/reports/spending-report-pdf${month ? `?month=${month}` : ""}`, {
+      headers,
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.message || "Failed to generate report");
+    }
+    const html = await res.text();
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+    } else {
+      throw new Error("Popup blocked! Please allow popups for this site.");
+    }
+  },
 };

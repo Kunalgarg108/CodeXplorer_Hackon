@@ -159,10 +159,10 @@ export function TransactionList({ filters = "" }) {
   }
 
   return (
-    <div className="bg-white rounded-lg border">
+    <div className="neo-card bg-[#010d1e] border border-steel/30 text-paper p-0 overflow-hidden">
       {selectedIds.length > 0 && (
-        <div className="bg-blue-50 border-b border-blue-100 px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-          <div className="text-sm text-blue-700 font-medium">
+        <div className="bg-[#001533] border-b border-steel/50 px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+          <div className="text-sm text-[#1c6cff] font-semibold">
             {selectedIds.length} transaction(s) selected
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -173,7 +173,7 @@ export function TransactionList({ filters = "" }) {
                   e.target.value = "";
                 }
               }}
-              className="px-3 py-1.5 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="px-3 py-1.5 bg-[#001533] border border-steel/50 rounded-xl text-paper text-sm focus:outline-none focus:ring-1 focus:ring-[#1c6cff]"
             >
               <option value="">Bulk Categorize...</option>
               <option value="Food & Dining">Food & Dining</option>
@@ -187,43 +187,37 @@ export function TransactionList({ filters = "" }) {
               <option value="Miscellaneous">Miscellaneous</option>
             </select>
 
-            <Button
+            <button
               onClick={() => handleBulkAction("EXCLUDE", { excludeFromAnalysis: true })}
-              variant="outline"
-              size="sm"
-              className="text-gray-700 hover:text-gray-900 border-gray-300 bg-white"
+              className="px-3 py-1.5 bg-[#001533] border border-steel/50 text-fog hover:text-white rounded-xl text-xs font-semibold transition"
             >
               Exclude
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={() => handleBulkAction("EXCLUDE", { excludeFromAnalysis: false })}
-              variant="outline"
-              size="sm"
-              className="text-gray-700 hover:text-gray-900 border-gray-300 bg-white"
+              className="px-3 py-1.5 bg-[#001533] border border-steel/50 text-fog hover:text-white rounded-xl text-xs font-semibold transition"
             >
               Include
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={() => {
                 if (confirm(`Mark ${selectedIds.length} transactions as ignored?`)) {
                   handleBulkAction("DELETE");
                 }
               }}
-              variant="destructive"
-              size="sm"
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="px-3 py-1.5 bg-[#ff4433]/15 text-[#ff4433] hover:bg-[#ff4433]/30 rounded-xl text-xs font-semibold transition"
             >
               Delete
-            </Button>
+            </button>
           </div>
         </div>
       )}
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="border-b bg-gray-50">
+          <thead className="border-b border-steel/30 bg-[#001533]">
             <tr>
-              <th className="px-4 py-3 text-left w-10">
+              <th className="px-4 py-3.5 text-left w-10">
                 <input
                   type="checkbox"
                   checked={
@@ -231,44 +225,44 @@ export function TransactionList({ filters = "" }) {
                     selectedIds.length === transactions.length
                   }
                   onChange={handleSelectAll}
-                  className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="rounded bg-[#001533] border-steel/50 text-[#1c6cff] focus:ring-0 cursor-pointer"
                 />
               </th>
-              <th className="px-4 py-3 text-left font-semibold">
+              <th className="px-4 py-3.5 text-left font-semibold text-mist uppercase tracking-wider text-xs">
                 <button
                   onClick={() => handleSort("date")}
-                  className="flex items-center gap-1 hover:text-blue-600"
+                  className="flex items-center gap-1 hover:text-white transition"
                 >
                   Date <SortArrow column="date" />
                 </button>
               </th>
-              <th className="px-4 py-3 text-left font-semibold">Merchant</th>
-              <th className="px-4 py-3 text-right font-semibold">
+              <th className="px-4 py-3.5 text-left font-semibold text-mist uppercase tracking-wider text-xs">Merchant</th>
+              <th className="px-4 py-3.5 text-right font-semibold text-mist uppercase tracking-wider text-xs">
                 <button
                   onClick={() => handleSort("amount")}
-                  className="flex items-center justify-end gap-1 hover:text-blue-600 w-full"
+                  className="flex items-center justify-end gap-1 hover:text-white transition w-full"
                 >
                   Amount <SortArrow column="amount" />
                 </button>
               </th>
-              <th className="px-4 py-3 text-left font-semibold">Type</th>
-              <th className="px-4 py-3 text-left font-semibold">Category</th>
-              <th className="px-4 py-3 text-center font-semibold">Actions</th>
+              <th className="px-4 py-3.5 text-left font-semibold text-mist uppercase tracking-wider text-xs">Type</th>
+              <th className="px-4 py-3.5 text-left font-semibold text-mist uppercase tracking-wider text-xs">Category</th>
+              <th className="px-4 py-3.5 text-center font-semibold text-mist uppercase tracking-wider text-xs">Actions</th>
             </tr>
           </thead>
           <tbody>
             {transactions.length === 0 ? (
               <tr>
-                <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
-                  {loading ? "Loading..." : "No transactions found"}
+                <td colSpan="7" className="px-4 py-12 text-center text-mist">
+                  {loading ? "Loading transactions..." : "No transactions found"}
                 </td>
               </tr>
             ) : (
               transactions.map((txn) => (
                 <tr
                   key={txn.id}
-                  className={`border-b hover:bg-gray-50 ${
-                    selectedIds.includes(txn.id) ? "bg-blue-50/30" : ""
+                  className={`border-b border-steel/20 hover:bg-[#1c6cff]/5 transition-colors ${
+                    selectedIds.includes(txn.id) ? "bg-[#1c6cff]/10 hover:bg-[#1c6cff]/15" : ""
                   }`}
                 >
                   <td className="px-4 py-3">
@@ -276,28 +270,28 @@ export function TransactionList({ filters = "" }) {
                       type="checkbox"
                       checked={selectedIds.includes(txn.id)}
                       onChange={() => handleSelectOne(txn.id)}
-                      className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      className="rounded bg-[#001533] border-steel/50 text-[#1c6cff] focus:ring-0 cursor-pointer"
                     />
                   </td>
-                  <td className="px-4 py-3 text-gray-700">
+                  <td className="px-4 py-3 text-fog font-light">
                     {new Date(txn.transactionDate).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col">
-                      <span className="font-medium">{txn.merchantName}</span>
+                      <span className="font-semibold text-white">{txn.merchantName}</span>
                       {txn.description && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-mist font-light">
                           {txn.description}
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold">
+                  <td className="px-4 py-3 text-right font-bold">
                     <span
                       className={
                         txn.transactionType === "DEBIT"
-                          ? "text-red-600"
-                          : "text-green-600"
+                          ? "text-[#ff4433]"
+                          : "text-[#00cc4b]"
                       }
                     >
                       {txn.transactionType === "DEBIT" ? "-" : "+"} ₹
@@ -306,24 +300,24 @@ export function TransactionList({ filters = "" }) {
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                      className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                         txn.transactionType === "DEBIT"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-green-100 text-green-700"
+                          ? "bg-[#ff4433]/15 text-[#ff4433]"
+                          : "bg-[#00cc4b]/15 text-[#00cc4b]"
                       }`}
                     >
                       {txn.transactionType === "DEBIT" ? "Spent" : "Received"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-gray-700 font-medium">{txn.category}</span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-white font-medium">{txn.category}</span>
                       {txn.categoryConfidence > 0 && (
                         <span
-                          className={`text-xs ${
+                          className={`text-xs font-light ${
                             txn.categoryConfidence === 100
-                              ? "text-green-600 font-semibold"
-                              : "text-gray-400"
+                              ? "text-[#00cc4b]"
+                              : "text-mist"
                           }`}
                         >
                           {txn.categoryConfidence === 100
@@ -334,21 +328,21 @@ export function TransactionList({ filters = "" }) {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-1 justify-center">
+                    <div className="flex gap-2 justify-center">
                       <button
                         onClick={() => handleToggleCategory(txn)}
                         title="Edit category"
-                        className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                        className="px-2.5 py-1 text-xs bg-[#1c6cff]/15 text-[#1c6cff] hover:bg-[#1c6cff]/30 rounded-lg transition font-semibold"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleToggleExclude(txn)}
                         title={txn.excludeFromAnalysis ? "Include in analysis" : "Exclude from analysis"}
-                        className={`px-2 py-1 text-xs rounded ${
+                        className={`px-2.5 py-1 text-xs rounded-lg transition font-semibold ${
                           txn.excludeFromAnalysis
-                            ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            ? "bg-[#ff8833]/15 text-[#ff8833] hover:bg-[#ff8833]/30"
+                            : "bg-[#001533] text-fog border border-steel/50 hover:bg-steel/30"
                         }`}
                       >
                         {txn.excludeFromAnalysis ? "Excluded" : "Include"}
@@ -356,7 +350,7 @@ export function TransactionList({ filters = "" }) {
                       <button
                         onClick={() => handleDelete(txn.id)}
                         title="Delete"
-                        className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                        className="px-2.5 py-1 text-xs bg-[#ff4433]/15 text-[#ff4433] hover:bg-[#ff4433]/30 rounded-lg transition font-semibold"
                       >
                         Delete
                       </button>
@@ -370,13 +364,13 @@ export function TransactionList({ filters = "" }) {
       </div>
 
       {pagination.pages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
-          <span className="text-sm text-gray-600">
+        <div className="flex items-center justify-between px-4 py-3.5 border-t border-steel/30 bg-[#001533]">
+          <span className="text-sm text-mist font-light">
             Page {pagination.page} of {pagination.pages} ({pagination.total}{" "}
             total)
           </span>
           <div className="flex gap-2">
-            <Button
+            <button
               onClick={() =>
                 setPagination({
                   ...pagination,
@@ -384,12 +378,11 @@ export function TransactionList({ filters = "" }) {
                 })
               }
               disabled={pagination.page === 1}
-              variant="outline"
-              size="sm"
+              className="px-3.5 py-1.5 bg-steel/30 hover:bg-steel/50 border border-steel/50 text-fog rounded-xl text-xs font-semibold transition disabled:opacity-30 disabled:pointer-events-none"
             >
               Previous
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={() =>
                 setPagination({
                   ...pagination,
@@ -397,11 +390,10 @@ export function TransactionList({ filters = "" }) {
                 })
               }
               disabled={pagination.page === pagination.pages}
-              variant="outline"
-              size="sm"
+              className="px-3.5 py-1.5 bg-steel/30 hover:bg-steel/50 border border-steel/50 text-fog rounded-xl text-xs font-semibold transition disabled:opacity-30 disabled:pointer-events-none"
             >
               Next
-            </Button>
+            </button>
           </div>
         </div>
       )}

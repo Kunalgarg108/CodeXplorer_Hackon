@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import auth from "../middleware/auth.js";
+import { auth } from "../middleware/auth.js";
 import BankStatement from "../models/BankStatement.js";
 import Transaction from "../models/Transaction.js";
 import {
@@ -10,6 +10,7 @@ import {
 } from "../utils/pdfParser.js";
 import { categorizeMerchant, categorizeTransactionMerchant } from "../utils/merchantCategorizer.js";
 import { findDuplicateTransactions } from "../utils/transactionHelper.js";
+import { checkCategoryThresholds } from "../utils/alertHelper.js";
 
 const router = express.Router();
 
@@ -188,6 +189,23 @@ router.post("/upload-confirm/:bankStatementId", auth, async (req, res) => {
     bankStatement.transactionIds = savedTransactionIds;
     bankStatement.accepted = true;
     await bankStatement.save();
+
+    // Trigger alert threshold checks for all imported transactions
+    try {
+      const categoryDates = new Map();
+      for (const txn of tempTransactions) {
+        if (txn.transactionType === "DEBIT" && txn.category) {
+          const dateVal = new Date(txn.transactionDate);
+          const key = `${txn.category}_${dateVal.getFullYear()}_${dateVal.getMonth()}`;
+          categoryDates.set(key, { category: txn.category, date: dateVal });
+        }
+      }
+      for (const val of categoryDates.values()) {
+        await checkCategoryThresholds(req.user.id, req.user.email, val.category, val.date);
+      }
+    } catch (alertErr) {
+      console.error("Error triggering alerts on upload confirmation:", alertErr);
+    }
 
     res.status(200).json({
       message: "Transactions confirmed and saved",
