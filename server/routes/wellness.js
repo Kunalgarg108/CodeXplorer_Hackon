@@ -5,6 +5,7 @@ import Expense from "../models/Expense.js";
 import { auth } from "../middleware/auth.js";
 import getBurnoutAnalysis from "../utils/getBurnoutAnalysis.js";
 import { getWeeklyAnalysis } from "../utils/getWeeklyAnalysis.js";
+import { getExchangeRates, getCurrencySymbol } from "../services/currencyService.js";
 
 const router = express.Router();
 
