@@ -13,22 +13,24 @@ const burnoutCache = new Map(); // userId -> { contextStr, analysis }
 const weeklyWellnessCache = new Map(); // userId -> { contextStr, analysis }
 
 export function updateBurnoutState(history, state = {}) {
+  // If we are starting from a checkpoint (e.g., after lastResolvedBurnout), start with that state.
+  // Otherwise, start with "normal".
+  let burnoutState = state.startState || "normal";
+  let triggerDate = state.triggerDate || null;
+  let recoveryDaysRequired = state.recoveryDaysRequired || 3;
+  let recoveryDaysCompleted = state.recoveryDaysCompleted || 0;
+
   if (!history || history.length === 0) {
     return {
-      burnoutState: "normal",
-      triggerDate: null,
-      recoveryDaysRequired: 3,
-      recoveryDaysCompleted: 0
+      burnoutState,
+      triggerDate,
+      recoveryDaysRequired,
+      recoveryDaysCompleted
     };
   }
 
   // Sort history chronologically
   const sortedCheckins = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
-  
-  let burnoutState = "normal";
-  let triggerDate = null;
-  let recoveryDaysRequired = state.recoveryDaysRequired || 3;
-  let recoveryDaysCompleted = 0;
 
   for (let i = 0; i < sortedCheckins.length; i++) {
     const today = sortedCheckins[i];
@@ -99,13 +101,21 @@ async function recomputeWellnessState(user) {
     user.wellnessProfile = {};
   }
   const checkins = user.wellnessProfile.dailyCheckins || [];
+  const lastResolved = user.wellnessProfile.lastResolvedBurnout;
+
+  // Filter check-ins to only those after lastResolvedBurnout
+  const filteredCheckins = lastResolved
+    ? checkins.filter(c => new Date(c.date) > new Date(lastResolved))
+    : checkins;
+
   const state = {
+    startState: lastResolved ? "recovering" : "normal",
     burnoutState: user.wellnessProfile.burnoutState || "normal",
     triggerDate: user.wellnessProfile.triggerDate || null,
     recoveryDaysRequired: user.wellnessProfile.recoveryDaysRequired || 3,
     recoveryDaysCompleted: user.wellnessProfile.recoveryDaysCompleted || 0
   };
-  const updatedState = updateBurnoutState(checkins, state);
+  const updatedState = updateBurnoutState(filteredCheckins, state);
   
   user.wellnessProfile.burnoutState = updatedState.burnoutState;
   user.wellnessProfile.triggerDate = updatedState.triggerDate;
@@ -203,11 +213,12 @@ router.post("/resolve-burnout", auth, async (req, res) => {
     }
 
     user.wellnessProfile.lastResolvedBurnout = new Date();
-    await user.save();
+    await recomputeWellnessState(user);
 
     res.json({
       message: "Burnout phase resolved",
-      lastResolvedBurnout: user.wellnessProfile.lastResolvedBurnout
+      lastResolvedBurnout: user.wellnessProfile.lastResolvedBurnout,
+      burnoutState: user.wellnessProfile.burnoutState
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

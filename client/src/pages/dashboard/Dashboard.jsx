@@ -164,9 +164,41 @@ export default function Dashboard() {
         <p className="text-mist text-sm md:text-base font-light">Here's your overview</p>
       </div>
 
+      {/* Chronic Burnout Alert Banner */}
+      {burnoutAnalysis?.burnoutState === "chronic" && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.01 }}
+          onClick={() => setIsBreathingOpen(true)}
+          className="bg-gradient-to-r from-[#ff4433]/20 via-[#ff4433]/15 to-[#ff4433]/5 border border-[#ff4433]/60 hover:border-[#ff4433] p-4 rounded-xl flex items-center justify-between gap-4 cursor-pointer transition-all shadow-[0_0_20px_rgba(255,68,51,0.15)] relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-[#ff4433]/5 animate-pulse pointer-events-none" />
+          
+          <div className="flex items-center gap-3.5 relative z-10">
+            <span className="flex h-3.5 w-3.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4433] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#ff4433]"></span>
+            </span>
+            <div>
+              <h4 className="text-sm font-bold text-[#ff4433] font-display flex items-center gap-1.5">
+                🚨 Chronic Burnout Warning Active
+              </h4>
+              <p className="text-xs text-fog font-thin mt-1">
+                You've recorded high stress (≥ 4/5) for {burnoutAnalysis?.consecutiveStressDays || 5} consecutive check-ins. Let's reset.
+              </p>
+            </div>
+          </div>
+          
+          <button className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#ff4433] text-white hover:bg-[#ff4433]/90 transition-colors shrink-0 relative z-10 shadow-md">
+            Relax Now
+          </button>
+        </motion.div>
+      )}
+
       {/* AI Insight banner */}
       {financialAdvice && (
-        <div 
+        <div
           className="flex items-start gap-4 bg-gradient-to-r from-signal/15 to-[#001533]/5 border border-signal/20 rounded-[var(--border-radius-lg)] p-[1rem_1.25rem] shadow-neo"
         >
           <div className="w-8 h-8 rounded-full bg-[#001533] border border-signal/30 flex items-center justify-center shrink-0 mt-0.5 text-signal">
@@ -197,12 +229,12 @@ export default function Dashboard() {
                 spent of {format(totalBudget)} budget
               </span>
             </div>
-            
+
             {/* Progress bar */}
             <div className="w-full bg-[#11263b]/50 rounded-full h-[10px] overflow-hidden border border-steel/10">
-              <div 
-                className="bg-signal h-[10px] rounded-full transition-all duration-500" 
-                style={{ 
+              <div
+                className="bg-signal h-[10px] rounded-full transition-all duration-500"
+                style={{
                   width: `${totalBudget > 0 ? Math.min((totalSpend / totalBudget) * 100, 100) : 0}%`,
                   minWidth: totalSpend > 0 ? "4px" : "0px"
                 }}
@@ -258,13 +290,12 @@ export default function Dashboard() {
               <div className="flex justify-between items-start mb-2">
                 <span className="text-[12px] font-semibold text-mist uppercase tracking-[0.05em]">TODAY'S STATUS</span>
                 {wellnessProfile?.surveyCompleted && hasCheckedInToday && todayCheckin && (
-                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${
-                    {
+                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${{
                       Relaxed: "bg-tag-lime/15 text-tag-lime border-tag-lime/40",
                       Moderate: "bg-tag-tangerine/15 text-tag-tangerine border-tag-tangerine/40",
                       Stressful: "bg-tag-coral/15 text-tag-coral border-tag-coral/40"
                     }[getTodayStatusLabel(todayCheckin).split(" ")[0]] || "bg-[#11263b]/50 text-mist border-steel/20"
-                  }`}>
+                    }`}>
                     {getTodayStatusLabel(todayCheckin).split(" ")[0]}
                   </span>
                 )}
@@ -314,7 +345,7 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            
+
             {wellnessProfile?.surveyCompleted && (
               <div className="mt-auto pt-3 border-t border-steel/30 mt-4">
                 <Link to="/dashboard/wellness" className="text-sm text-signal hover:underline flex items-center gap-1 font-semibold">
@@ -328,7 +359,7 @@ export default function Dashboard() {
           {wellnessProfile?.surveyCompleted && burnoutAnalysis && (
             <div className="flex flex-col gap-1.5 w-full">
               <span className="text-[12px] font-semibold text-mist uppercase tracking-[0.05em] pl-0.5">RECOVERY STATUS</span>
-              <RecoveryStatusCard 
+              <RecoveryStatusCard
                 burnoutState={burnoutAnalysis.burnoutState}
                 recoveryDaysCompleted={burnoutAnalysis.recoveryDaysCompleted}
                 recoveryDaysRequired={burnoutAnalysis.recoveryDaysRequired}
@@ -343,9 +374,9 @@ export default function Dashboard() {
       </div>
 
       {/* Activity Section */}
-      <BarChartDashboard 
-        budgetList={budgetList} 
-        height={260} 
+      <BarChartDashboard
+        budgetList={budgetList}
+        height={260}
         className="neo-card bg-deep border border-steel/30 rounded-[var(--border-radius-lg)] p-[1.25rem]"
       />
 
@@ -371,7 +402,7 @@ export default function Dashboard() {
                       <span className="text-fog font-light">{format(budget.totalSpend || 0)} / {format(budget.amount)}</span>
                     </div>
                     <div className="w-full bg-[#11263b]/50 rounded-full h-1.5 overflow-hidden border border-[#11263b]/20">
-                      <div 
+                      <div
                         className="bg-signal h-1.5 rounded-full transition-all duration-300"
                         style={{ width: `${spendPercent}%` }}
                       />
