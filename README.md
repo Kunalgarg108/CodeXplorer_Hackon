@@ -1,4 +1,4 @@
-<img width="1917" height="826" alt="Screenshot 2026-06-15 213711" src="https://github.com/user-attachments/assets/297298e2-773d-49c7-8768-7bb1019f31e3" /># PocketBuddy – AI Financial & Wellness Assistant for Students
+AI Financial & Wellness Assistant for Students
 
 > **An Intelligent, Secure, and Wellness-Focused Expense Hub powered by Amazon Web Services (AWS)**
 
