@@ -1,4 +1,4 @@
-AI Financial & Wellness Assistant for Students
+PocketBuddy-AI Financial & Wellness Assistant for Students
 
 > **An Intelligent, Secure, and Wellness-Focused Expense Hub powered by Amazon Web Services (AWS)**
 
