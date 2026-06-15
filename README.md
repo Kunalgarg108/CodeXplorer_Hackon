@@ -37,6 +37,41 @@
 
 ---
 
+## 📁 Project Structure
+
+```text
+PocketBuddy/
+├── client/                  # Frontend: React 18 + Vite
+│   ├── public/              # Static assets
+│   ├── src/                 # Application source code
+│   │   ├── components/      # Reusable dashboard, UI, and animation components
+│   │   │   ├── dashboard/   # Dashboard forms, widgets, and lists
+│   │   │   └── ui/          # Radix & Shadcn UI primitives
+│   │   ├── context/         # AuthContext for global session management
+│   │   ├── lib/             # Centralized API request wrapper (api.js)
+│   │   ├── pages/           # Page routers (Dashboard, Wellness, Auth, Home)
+│   │   ├── App.jsx          # Main client application router
+│   │   ├── index.css        # Core styles and Tailwind design directives
+│   │   └── main.jsx         # React application entry point
+│   ├── package.json         # Client dependency configuration
+│   └── vite.config.js       # Vite configuration
+│
+├── server/                  # Backend: Node.js + Express
+│   ├── config/              # Database connections (Mongoose)
+│   ├── middleware/          # Security & authorization (JWT) middlewares
+│   ├── models/              # MongoDB Mongoose schemas (User, Budget, Transactions)
+│   ├── routes/              # Express endpoint routers (auth, advice, menu)
+│   ├── services/            # Background logic (Bedrock OCR parser, currency service)
+│   ├── utils/               # Centralized AI API clients (aiClient.js, advice helpers)
+│   ├── index.js             # Express application entry point
+│   └── package.json         # Server dependency configuration
+│
+├── package.json             # Root workspace package file (scripts for concurrently running frontend & backend)
+└── README.md                # Main project documentation
+```
+
+---
+
 ## Technology Stack
 
 | Component | Technology | Usage Description |
