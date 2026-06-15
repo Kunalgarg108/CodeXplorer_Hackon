@@ -49,7 +49,7 @@
 
 
 ### 8. Fitness
-<img width="1919" height="824" alt="Screenshot 2026-06-15 213750" src="https://github.com/user-attachments/assets/6830bb86-7c80-4cab-84c2-26f8d6911b95" />
+<img width="1911" height="821" alt="Screenshot 2026-06-15 213813" src="https://github.com/user-attachments/assets/38e23d99-f6dc-4b81-b81c-8d2fb1f8c0ef" />
 <img width="1919" height="827" alt="Screenshot 2026-06-15 213825" src="https://github.com/user-attachments/assets/8978fe75-a716-4037-a8c7-c4085337dadc" />
 
 
