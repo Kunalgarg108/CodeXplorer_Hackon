@@ -1,4 +1,4 @@
-# PocketBuddy – AI Financial & Wellness Assistant for Students
+<img width="1917" height="826" alt="Screenshot 2026-06-15 213711" src="https://github.com/user-attachments/assets/297298e2-773d-49c7-8768-7bb1019f31e3" /># PocketBuddy – AI Financial & Wellness Assistant for Students
 
 > **An Intelligent, Secure, and Wellness-Focused Expense Hub powered by Amazon Web Services (AWS)**
 
@@ -21,14 +21,44 @@
 <img width="1919" height="827" alt="Screenshot 2026-06-15 213356" src="https://github.com/user-attachments/assets/c536309b-f525-4510-a43b-73e79996cc25" />
 <img width="1919" height="824" alt="Screenshot 2026-06-15 213417" src="https://github.com/user-attachments/assets/025347dc-0340-4ef8-9922-daa6e04cab20" />
 
+
 ### 2. Student Dashboard Overview
 <img width="1919" height="822" alt="Screenshot 2026-06-15 213500" src="https://github.com/user-attachments/assets/eec7f6cd-e67a-463f-b518-eef044336580" />
+
 
 ### 3. AWS Bedrock AI Insights & Interactive Chat
 <img width="1919" height="821" alt="Screenshot 2026-06-15 213538" src="https://github.com/user-attachments/assets/9dc60917-f945-4fbe-970a-0f3613aaa793" />
 
+
 ### 4. Transaction Analysis & Classification
 <img width="1918" height="835" alt="Screenshot 2026-06-15 213556" src="https://github.com/user-attachments/assets/d8ec3a9b-46b4-431e-92dc-e323e90238f6" />
+
+
+### 5. Income
+<img width="1919" height="826" alt="Screenshot 2026-06-15 213619" src="https://github.com/user-attachments/assets/9900f5cb-854a-4188-b773-ea6c19e7950d" />
+
+
+### 6. Menu Scanner for Food advice
+<img width="1713" height="830" alt="Screenshot 2026-06-15 213650" src="https://github.com/user-attachments/assets/abd9df36-d4ca-4239-8b0d-4ab3c69302a2" />
+
+
+### 7. Wellness profile for student's mental health
+<img width="1917" height="826" alt="Screenshot 2026-06-15 213711" src="https://github.com/user-attachments/assets/ea96076b-77fc-4c88-8c43-39b2e9dc3f8a" />
+<img width="1919" height="824" alt="Screenshot 2026-06-15 213750" src="https://github.com/user-attachments/assets/b0c06c6c-ab85-4d40-8ced-a7026a0e14c3" />
+
+
+
+### 8. Fitness
+<img width="1919" height="824" alt="Screenshot 2026-06-15 213750" src="https://github.com/user-attachments/assets/6830bb86-7c80-4cab-84c2-26f8d6911b95" />
+<img width="1919" height="827" alt="Screenshot 2026-06-15 213825" src="https://github.com/user-attachments/assets/8978fe75-a716-4037-a8c7-c4085337dadc" />
+
+
+### 9. Profile
+<img width="1919" height="822" alt="Screenshot 2026-06-15 213841" src="https://github.com/user-attachments/assets/73ee8c25-d113-459e-b915-964219311456" />
+
+
+
+
 
 
 ---
