@@ -15,31 +15,25 @@
 
 ---
 
-## 📸 Project Screenshots
+## Project Screenshots
 
 ### 1. Landing Page
-*Welcome page and application introduction for students.*
-![Landing Page](./public/landing.png)
+<img width="1919" height="827" alt="Screenshot 2026-06-15 213356" src="https://github.com/user-attachments/assets/c536309b-f525-4510-a43b-73e79996cc25" />
+<img width="1919" height="824" alt="Screenshot 2026-06-15 213417" src="https://github.com/user-attachments/assets/025347dc-0340-4ef8-9922-daa6e04cab20" />
 
 ### 2. Student Dashboard Overview
-*Interactive panel displaying total budget limits, real-time spending metrics in INR, and recovery wellness status.*
-![Dashboard Overview](./public/dashboard-divya.png)
+<img width="1919" height="822" alt="Screenshot 2026-06-15 213500" src="https://github.com/user-attachments/assets/eec7f6cd-e67a-463f-b518-eef044336580" />
 
 ### 3. AWS Bedrock AI Insights & Interactive Chat
-*Personalized financial recommendations, AI suggestions, and smart budget alarms workspace.*
-![AWS Bedrock AI Insights](./public/pocket-buddy-ai.png)
+<img width="1919" height="821" alt="Screenshot 2026-06-15 213538" src="https://github.com/user-attachments/assets/9dc60917-f945-4fbe-970a-0f3613aaa793" />
 
 ### 4. Transaction Analysis & Classification
-*Visual analytics dashboard summarizing monthly spending categories, top merchants, and transaction trends.*
-![Transaction Analysis](./public/transactions-analysis.png)
+<img width="1918" height="835" alt="Screenshot 2026-06-15 213556" src="https://github.com/user-attachments/assets/d8ec3a9b-46b4-431e-92dc-e323e90238f6" />
 
-### 5. Multi-Currency Dashboard Overview (USD)
-*Dashboard showing real-time currency conversion exchange rates.*
-![Dashboard Overview USD](./public/dashboard-john.png)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 PocketBuddy/
