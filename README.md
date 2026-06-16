@@ -111,6 +111,7 @@ PocketBuddy/
 | **OCR Engines** | **Tesseract.js** | Extracts raw text from menu scans for parsing. |
 | **Cloud AI Gateway** | **AWS Bedrock SDK** | Powered by `@aws-sdk/client-bedrock-runtime` for serverless AI operations. |
 | **AI LLM Models** | **Amazon Bedrock Models** | `openai.gpt-oss-120b`, `amazon.nova-pro-v1:0`, or Claude models for natural language reasoning. |
+| **Infrastructure** | **AWS EC2** | Cloud hosting and deployment of backend services with scalable compute resources and public API access. |
 
 ---
 
