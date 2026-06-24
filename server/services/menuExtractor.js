@@ -2,18 +2,16 @@ import Tesseract from "tesseract.js";
 import { chatCompletion, isAIConfigured } from "../utils/aiClient.js";
 
 /**
- * Menu extraction pipeline: Local OCR (Tesseract.js) + Text LLM (openai.gpt-oss-120b)
+ * Menu extraction pipeline: Local OCR (Tesseract.js) + Groq LLM
  * 
- * Flow: Image → Tesseract OCR → Raw Text → LLM → Structured JSON → MongoDB
- * 
- * No Bedrock Vision models needed.
+ * Flow: Image → Tesseract OCR → Raw Text → Groq → Structured JSON → MongoDB
  */
 
 const MENU_PARSER_PROMPT = `You are a restaurant menu parser. You receive raw OCR text from a restaurant menu image.
 
 Extract all food/drink items with their prices and categories.
 
-Return ONLY valid JSON array. No markdown, no explanation.
+Return ONLY valid JSON array. No markdown, no explanation, no code fences.
 
 Format:
 [
@@ -27,12 +25,14 @@ Rules:
 - If price is unclear, use 0.
 - If category is unclear, use "Other".
 - Do not invent items that are not in the text.
-- Return empty array [] if no menu items found.`;
+- Return empty array [] if no menu items found.
+- Your response must be valid JSON only.`;
 
 const parseJsonResponse = (text) => {
   if (!text) throw new Error("Empty response from LLM");
   const trimmed = text.trim();
 
+  // Direct JSON parse
   try { return JSON.parse(trimmed); } catch {}
 
   // Try extracting from markdown code blocks
@@ -53,6 +53,7 @@ const parseJsonResponse = (text) => {
     } catch {}
   }
 
+  console.error("[Menu Parser] Unable to parse JSON from response:", trimmed.slice(0, 200));
   throw new Error("Unable to parse menu JSON from LLM response");
 };
 
@@ -87,19 +88,23 @@ export const extractMenuItemsFromImage = async (imagePath) => {
 
   console.log("[OCR] Text extracted (" + menuText.length + " chars)");
 
-  // Step 2: Send OCR text to LLM for structured parsing
+  // Step 2: Send OCR text to Groq LLM for structured parsing
   if (!isAIConfigured()) {
-    throw new Error("AI not configured. Set OPENAI_API_KEY, OPENAI_BASE_URL, OPENAI_MODEL in .env");
+    throw new Error("AI not configured. Set GROQ_API_KEY and GROQ_MODEL in .env");
   }
 
-  console.log("[LLM] Parsing menu text into structured JSON...");
+  console.log("[LLM] Parsing menu text into structured JSON via Groq...");
 
   const content = await chatCompletion(
     [
       { role: "system", content: MENU_PARSER_PROMPT },
       { role: "user", content: menuText },
     ],
-    { maxTokens: 4000, temperature: 0 }
+    {
+      maxTokens: 4000,
+      temperature: 0,
+      jsonMode: true,
+    }
   );
 
   if (!content) {
@@ -114,6 +119,6 @@ export const extractMenuItemsFromImage = async (imagePath) => {
     throw new Error("No menu items found in the image. Try a clearer photo with visible prices.");
   }
 
-  console.log(`[DB] Saving ${items.length} menu items`);
+  console.log(`[Menu] Extracted ${items.length} menu items`);
   return items;
 };

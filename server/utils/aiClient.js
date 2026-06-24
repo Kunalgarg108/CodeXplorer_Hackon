@@ -1,39 +1,33 @@
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 
 /**
- * Centralized AI client for text tasks via Bedrock Mantle (OpenAI-compatible endpoint).
- * 
- * TEXT tasks (chat, recommendations, summaries, advice):
- *   → OPENAI_MODEL via bedrock-mantle endpoint
- * 
- * VISION tasks (menu image extraction):
- *   → amazon.nova-pro-v1:0 via native AWS Converse API (in bedrockService.js)
- *   Nova Pro does NOT support bedrock-mantle / OpenAI-compatible endpoint.
- * 
+ * Centralized AI client using Groq.
+ *
+ * All text tasks (chat, recommendations, summaries, advice, menu parsing):
+ *   → GROQ_MODEL via Groq API
+ *
  * ENV VARS:
- *   OPENAI_API_KEY   - Bedrock Mantle API key
- *   OPENAI_BASE_URL  - https://bedrock-mantle.us-east-1.api.aws/v1
- *   OPENAI_MODEL     - Text model (e.g. openai.gpt-oss-120b)
+ *   GROQ_API_KEY  - Groq API key
+ *   GROQ_MODEL    - Model name (e.g. llama-3.3-70b-versatile)
  */
 
 let _client = null;
 
 export function getAIClient() {
   if (_client) return _client;
-  const apiKey = process.env.OPENAI_API_KEY;
-  const baseURL = process.env.OPENAI_BASE_URL;
-  if (!apiKey || !baseURL) return null;
-  _client = new OpenAI({ apiKey, baseURL });
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return null;
+  _client = new Groq({ apiKey });
   return _client;
 }
 
 /** Text model for chat, recommendations, summaries, advice */
 export function getTextModel() {
-  return process.env.OPENAI_MODEL || "openai.gpt-oss-120b";
+  return process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 }
 
 export function isAIConfigured() {
-  return !!(process.env.OPENAI_API_KEY && process.env.OPENAI_BASE_URL && process.env.OPENAI_MODEL);
+  return !!(process.env.GROQ_API_KEY && process.env.GROQ_MODEL);
 }
 
 /**
@@ -52,8 +46,11 @@ function stripMarkdown(text) {
 }
 
 /**
- * Text-only chat completion. Uses OPENAI_MODEL via bedrock-mantle.
+ * Chat completion using Groq.
  * Returns plain text (markdown stripped) or null on failure.
+ *
+ * @param {Array} messages - Array of { role, content } objects (system/user/assistant)
+ * @param {Object} options - { maxTokens, temperature, jsonMode }
  */
 export async function chatCompletion(messages, options = {}) {
   const client = getAIClient();
@@ -62,17 +59,26 @@ export async function chatCompletion(messages, options = {}) {
   const model = getTextModel();
   const { maxTokens = 1024, temperature = 0.7, jsonMode = false } = options;
 
-  const requestBody = {
-    model,
-    messages,
-    max_tokens: maxTokens,
-    temperature,
-  };
+  try {
+    const requestBody = {
+      model,
+      messages,
+      max_tokens: maxTokens,
+      temperature,
+    };
 
-  const response = await client.chat.completions.create(requestBody);
-  const content = response.choices[0]?.message?.content || null;
-  if (!content) return null;
-  return jsonMode ? content : stripMarkdown(content);
+    if (jsonMode) {
+      requestBody.response_format = { type: "json_object" };
+    }
+
+    const response = await client.chat.completions.create(requestBody);
+    const content = response.choices[0]?.message?.content || null;
+    if (!content) return null;
+    return jsonMode ? content : stripMarkdown(content);
+  } catch (error) {
+    console.error("[Groq] Chat completion error:", error.message);
+    return null;
+  }
 }
 
 export { stripMarkdown };

@@ -56,7 +56,7 @@ app.use("/api/reports", reportRoutes);
 const start = async () => {
   try {
     // Validate required env vars
-    const required = ["OPENAI_API_KEY", "OPENAI_BASE_URL", "AWS_REGION"];
+    const required = ["GROQ_API_KEY", "GROQ_MODEL"];
     const missing = required.filter((k) => !process.env[k]);
     if (missing.length > 0) {
       console.warn(`⚠️  Missing env vars: ${missing.join(", ")}`);

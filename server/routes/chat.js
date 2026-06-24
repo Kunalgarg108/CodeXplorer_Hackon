@@ -5,7 +5,7 @@ import Income from "../models/Income.js";
 import Restaurant from "../models/Restaurant.js";
 import User from "../models/User.js";
 import { auth } from "../middleware/auth.js";
-import { chatCompletion, isAIConfigured, getTextModel } from "../utils/aiClient.js";
+import { chatCompletion, isAIConfigured } from "../utils/aiClient.js";
 
 const router = express.Router();
 
@@ -57,7 +57,7 @@ router.post("/", auth, async (req, res) => {
     if (!message?.trim()) return res.status(400).json({ message: "Message is required" });
 
     if (!isAIConfigured()) {
-      return res.json({ reply: "AI not configured. Set OPENAI_API_KEY, OPENAI_BASE_URL, and BEDROCK_MODEL_ID in .env." });
+      return res.json({ reply: "AI not configured. Set GROQ_API_KEY and GROQ_MODEL in .env." });
     }
 
     const context = await buildFinancialContext(req.user.email);
@@ -80,7 +80,7 @@ ${context.wellnessSummary ? `WELLNESS: Sleep ${context.wellnessSummary.sleepHour
 
 RULES: Use the user's preferred currency symbol when mentioning prices. Only recommend menu items from data above. Never invent items. Be concise (2-4 sentences). Be empathetic.`;
 
-    console.log(`[Chat] Using TEXT MODEL: ${getTextModel()} via ${process.env.OPENAI_BASE_URL}`);
+    console.log(`[Chat] Using Groq model: ${process.env.GROQ_MODEL || "llama-3.3-70b-versatile"}`);
 
     const messages = [
       { role: "system", content: systemPrompt },

@@ -2,7 +2,7 @@ import { chatCompletion, isAIConfigured } from "./aiClient.js";
 
 const getFinancialAdvice = async (totalBudget, totalIncome, totalSpend, symbol = "$") => {
   if (!isAIConfigured()) {
-    return `AI not configured. Set OPENAI_API_KEY and OPENAI_BASE_URL in server/.env.`;
+    return `AI not configured. Set GROQ_API_KEY and GROQ_MODEL in server/.env.`;
   }
 
   try {

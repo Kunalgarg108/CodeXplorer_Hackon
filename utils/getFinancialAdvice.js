@@ -1,13 +1,11 @@
 // utils/getFinancialAdvice.js
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 
-// Initialize the OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+// Initialize the Groq client
+const groq = new Groq({
+  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY,
   dangerouslyAllowBrowser: true,
 });
-
-// Function to fetch user-specific data (mocked for this example)
 
 // Function to generate personalized financial advice
 const getFinancialAdvice = async (totalBudget, totalIncome, totalSpend) => {
@@ -18,18 +16,15 @@ const getFinancialAdvice = async (totalBudget, totalIncome, totalSpend) => {
       - Total Budget: ${totalBudget} USD 
       - Expenses: ${totalSpend} USD 
       - Incomes: ${totalIncome} USD
-      Provide detailed financial advice in 2 sentence to help the user manage their finances more effectively.
+      Provide detailed financial advice in 2 sentences to help the user manage their finances more effectively.
     `;
 
-    // Send the prompt to the OpenAI API
-    const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4",
+    const completion = await groq.chat.completions.create({
+      model: process.env.NEXT_PUBLIC_GROQ_MODEL || "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: userPrompt }],
     });
 
-    // Process and return the response
-    const advice = chatCompletion.choices[0].message.content;
-
+    const advice = completion.choices[0].message.content;
     console.log(advice);
     return advice;
   } catch (error) {

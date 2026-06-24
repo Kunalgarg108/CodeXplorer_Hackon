@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import MenuJob from "../models/MenuJob.js";
 import Restaurant from "../models/Restaurant.js";
-import { extractMenuItemsFromImage } from "./bedrockService.js";
+import { extractMenuItemsFromImage } from "./menuExtractor.js";
 
 const deleteImage = async (imagePath) => {
   if (!imagePath) return;
